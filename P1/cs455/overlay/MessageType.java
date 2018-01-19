@@ -10,9 +10,11 @@ public class MessageType {
     private int port;
     private int successStatus;
     private byte[] infoString;
+    private int nodeID;
 
     public MessageType(InputStream message) throws IOException{
         try{
+            successStatus = 0;
             typeNumber = message.read();
         }
         catch(IOException e){
@@ -67,12 +69,11 @@ public class MessageType {
 
             //Get port number
             port = message.read();
+            successStatus = 1;
         }
         catch(IOException e){
             System.out.println("Incorrect message format. Message type 2.");
         }
-
-        successStatus = 1;
     }
 
     private void processType3(InputStream message){ //REGISTRY_REPORTS_REGISTRATION_STATUS
@@ -90,7 +91,7 @@ public class MessageType {
         }
     }
 
-    private void processType4(InputStream message){  //TODO: OVERLAY_NODE_SENDS_DEREGISTRATION
+    private void processType4(InputStream message){  //OVERLAY_NODE_SENDS_DEREGISTRATION
         try{
             //Get IP length and read IP into variable ip.
             int ipLength = message.read();
@@ -99,27 +100,32 @@ public class MessageType {
 
             //Get port number
             port = message.read();
+
+            //Get NodeID
+            nodeID = message.read();
+            successStatus = 1;
         }
         catch(IOException e){
-            System.out.println("Incorrect message format. Message type 2.");
+            System.out.println("Incorrect message format. Message type 4.");
         }
     }
 
-    private void processType5(InputStream message){  //TODO: REGISTRY_REPORTS_DEREGISTRATION_STATUS
+    private void processType5(InputStream message){  //REGISTRY_REPORTS_DEREGISTRATION_STATUS
         try{
-            //Get IP length and read IP into variable ip.
-            int ipLength = message.read();
-            ip = new byte[ipLength];
-            message.read(ip);
+            //Get successStatus
+            successStatus = message.read();
 
-            //Get port number
-            port = message.read();
+            //Get Info String length and Info String
+            int infoStringLength = message.read();
+            infoString = new byte[infoStringLength];
+            message.read(infoString);
         }
         catch(IOException e){
-            System.out.println("Incorrect message format. Message type 2.");
+            System.out.println("Incorrect message format. Message type 5.");
         }
     }
 
+    //TODO: HAVEN'T DONE THESE =========================================================================================
     private void processType6(InputStream message){  //TODO: REGISTRY_SENDS_NODE_MANIFEST
         try{
             //Get IP length and read IP into variable ip.
@@ -225,6 +231,17 @@ public class MessageType {
         }
     }
 
+    //TODO: HAVEN'T DONE ABOVE==========================================================================================
+
+    /*
+    private int typeNumber;
+    private byte[] ip;
+    private int port;
+    private int successStatus;
+    private byte[] infoString;
+    private int nodeID;
+     */
+
     public int getTypeNumber(){
         return typeNumber;
     }
@@ -239,5 +256,13 @@ public class MessageType {
 
     public int getSuccessStatus(){
         return successStatus;
+    }
+
+    public byte[] getInfoString(){
+        return infoString;
+    }
+
+    public int getNodeID(){
+        return nodeID; 
     }
 }
