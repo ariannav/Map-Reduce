@@ -47,7 +47,13 @@ public class Registry implements Runnable{
         while(!overlayInitiated){
             try{
                 Socket messengerSockit = sockit.accept();
+                MessageType message = new MessageType(messengerSockit.getInputStream());
 
+                if(message.getTypeNumber() != 2 || message.getSuccessStatus() != 1){
+                    throw new IOException("Incoming message type was not correct, or message format was incorrect.");
+                }
+
+                //TODO Using select
             }
             catch(Exception e){
                 System.out.println("Problem accepting connection on registry server socket. " + e);

@@ -263,6 +263,6 @@ public class MessageType {
     }
 
     public int getNodeID(){
-        return nodeID; 
+        return nodeID;
     }
 }
