@@ -1,14 +1,21 @@
 package cs455.overlay;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
 
 public class Registry implements Runnable{
 
-    ServerSocket sockit;
+    private ServerSocket sockit;
+    private boolean overlayInitiated;
+    private ArrayList messengerSockits;
 
     public Registry(){
         try{
             sockit = createServerSocket();
+            overlayInitiated = false;
+            messengerSockits = new ArrayList<Socket>();
         }
         catch(IOException e){
             System.out.println("Error encountered creating socket." + e + "\n");
@@ -18,8 +25,8 @@ public class Registry implements Runnable{
     private ServerSocket createServerSocket() throws IOException{
         for(int i = 2000; i < 10000; i++){
             try{
-                ServerSocket sockit = new ServerSocket(i);
-                return sockit;
+                ServerSocket temp = new ServerSocket(i);
+                return temp;
             }
             catch(Exception e){
                 continue;
@@ -28,18 +35,42 @@ public class Registry implements Runnable{
         throw new IOException("No available ports.");
     }
 
-    //TODO: Make getPort() s
+    public int getPortNumber(){
+        return sockit.getLocalPort();
+    }
+
+    public InetAddress getInetAddress(){
+        return sockit.getInetAddress();
+    }
+
+    public void listen(){
+        while(!overlayInitiated){
+            try{
+                Socket messengerSockit = sockit.accept();
+
+            }
+            catch(Exception e){
+                System.out.println("Problem accepting connection on registry server socket. " + e);
+            }
+
+        }
+    }
 
     public void run(){
         //Foreground thread.
+        //TODO: Change overlay initiated when overlay initiated.
     }
 
     public static void main(String[] argv){
         //Create registry, opens socket and finds port number.
         Registry registry = new Registry();
+        System.out.println("Registry is now listening at " + registry.getInetAddress() + " on port " + registry.getPortNumber() + ".");
 
-        //TODO: System.out.println("Server socket ");
         //Create foreground thread.
+        //TODO
+
+        //Registry listen for incoming connections.
+        registry.listen();
     }
 }
 
