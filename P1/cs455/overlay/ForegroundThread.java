@@ -54,6 +54,7 @@ public class ForegroundThread implements Runnable{
                     break;
                 default:
                     System.out.println("Improperly formatted command. Please try again. Ex:list-messaging-nodes");
+                    break;
             }
         }
     }

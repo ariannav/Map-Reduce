@@ -17,7 +17,7 @@ public class Registry implements Runnable{
         foreground.start();
 
         //Registry listen for incoming connections.
-        //registry.listen();
+        registry.listen();
 
         System.out.println("Closing server socket, exiting program.");
         registry.closeServSocket();
