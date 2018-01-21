@@ -7,21 +7,42 @@ import java.util.ArrayList;
 
 public class Registry implements Runnable{
 
+    public static void main(String[] argv){
+        //Create registry, opens socket and finds port number.
+        Registry registry = new Registry();
+        System.out.println("Registry is now listening at " + registry.getInetAddress() + " on port " + registry.getPortNumber() + ".");
+
+        //Create foreground thread.
+        Thread foreground = new Thread(new ForegroundThread(registry));
+        foreground.start();
+
+        //Registry listen for incoming connections.
+        //registry.listen();
+
+        System.out.println("Closing server socket, exiting program.");
+        registry.closeServSocket();
+        foreground.interrupt();
+    }
+
+
+    //==============================================Start Registry Class================================================
+
     private ServerSocket sockit;
     private boolean overlayInitiated;
-    private ArrayList messengerSockits;
 
+    //Registry Constructor
     public Registry(){
         try{
             sockit = createServerSocket();
             overlayInitiated = false;
-            messengerSockits = new ArrayList<Socket>();
         }
         catch(IOException e){
             System.out.println("Error encountered creating socket." + e + "\n");
         }
     }
 
+
+    //Opens the initial server socket and finds an acceptable port.
     private ServerSocket createServerSocket() throws IOException{
         for(int i = 2000; i < 10000; i++){
             try{
@@ -35,14 +56,26 @@ public class Registry implements Runnable{
         throw new IOException("No available ports.");
     }
 
+
+    //Gets the port number the server socket is running on.
     public int getPortNumber(){
         return sockit.getLocalPort();
     }
 
+
+    //Returns the host name of the machine the server is running on.
     public InetAddress getInetAddress(){
-        return sockit.getInetAddress();
+        try{
+            return sockit.getInetAddress().getLocalHost();
+        }
+        catch(Exception e){
+            System.out.println("Cannot get local host address.");
+        }
+        return null;
     }
 
+
+    //Listens for incoming connections, this should be going on throughout the entire program.
     public void listen(){
         while(!overlayInitiated){
             try{
@@ -62,22 +95,47 @@ public class Registry implements Runnable{
         }
     }
 
+
+    //Closes the sockets that are open.
+    private void closeServSocket(){
+        try{
+            sockit.close();
+        }
+        catch(IOException e){
+            System.out.println("Error closing server socket. " + e);
+        }
+    }
+
+
+    public String getMessagingNodeInfo(){
+        //TODO
+        return "Nothing yet! Hi Colton!";
+    }
+
+
+    public void setupOverlay(int numEntries){
+        //TODO
+        return;
+    }
+
+
+    public String getRoutingTables(){
+        //TODO
+        return null;
+    }
+
+
+    public void startSendingMessages(int numMessages){
+        //TODO
+        return;
+    }
+
+
     public void run(){
         //Foreground thread.
-        //TODO: Change overlay initiated when overlay initiated.
+        //TODO: This is a thread that is connected to a new messenger node
     }
 
-    public static void main(String[] argv){
-        //Create registry, opens socket and finds port number.
-        Registry registry = new Registry();
-        System.out.println("Registry is now listening at " + registry.getInetAddress() + " on port " + registry.getPortNumber() + ".");
-
-        //Create foreground thread.
-        //TODO
-
-        //Registry listen for incoming connections.
-        registry.listen();
-    }
 }
 
 
