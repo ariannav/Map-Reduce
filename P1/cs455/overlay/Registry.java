@@ -1,4 +1,6 @@
 package cs455.overlay;
+import java.io.BufferedReader;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.io.IOException;
@@ -29,12 +31,14 @@ public class Registry implements Runnable{
 
     private ServerSocket sockit;
     private boolean overlayInitiated;
+    private ArrayList threads;
 
     //Registry Constructor
     public Registry(){
         try{
             sockit = createServerSocket();
             overlayInitiated = false;
+            threads = new ArrayList<Thread>();
         }
         catch(IOException e){
             System.out.println("Error encountered creating socket." + e + "\n");
@@ -76,17 +80,13 @@ public class Registry implements Runnable{
 
 
     //Listens for incoming connections, this should be going on throughout the entire program.
-    public void listen(){
+    private void listen(){
         while(!overlayInitiated){
             try{
                 Socket messengerSockit = sockit.accept();
-                MessageType message = new MessageType(messengerSockit.getInputStream());
 
-                if(message.getTypeNumber() != 2 || message.getSuccessStatus() != 1){
-                    throw new IOException("Incoming message type was not correct, or message format was incorrect.");
-                }
+                //TODO Create new thread. Handle connection. Look at run().
 
-                //TODO Using select
             }
             catch(Exception e){
                 System.out.println("Problem accepting connection on registry server socket. " + e);
@@ -114,7 +114,8 @@ public class Registry implements Runnable{
 
 
     public void setupOverlay(int numEntries){
-        //TODO
+        overlayInitiated = true;
+        //TODO Make sure to realize that the server socket is now no longer listening. Assumption in README? Should this be the case?
         return;
     }
 
@@ -134,6 +135,16 @@ public class Registry implements Runnable{
     public void run(){
         //Foreground thread.
         //TODO: This is a thread that is connected to a new messenger node
+
+        //TODO MessageType message = new MessageType(messengerSockit.getInputStream());
+//        try{
+//            if(message.getTypeNumber() != 2 || message.getSuccessStatus() != 1){
+//                throw new IOException("Incoming message type was not correct, or message format was incorrect.");
+//            }
+//        }
+//        catch(IOException e){
+//
+//        }
     }
 
 }

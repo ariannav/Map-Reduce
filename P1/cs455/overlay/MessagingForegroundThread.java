@@ -4,8 +4,8 @@ import java.util.Scanner;
 
 public class MessagingForegroundThread implements Runnable{
 
-    MessagingNode messager;
-    boolean done;
+    private MessagingNode messager;
+    private boolean done;
 
     public MessagingForegroundThread(MessagingNode messager){
         this.messager = messager;
@@ -36,5 +36,6 @@ public class MessagingForegroundThread implements Runnable{
                     break;
             }
         }
+        console.close();
     }
 }

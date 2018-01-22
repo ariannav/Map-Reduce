@@ -4,8 +4,8 @@ import java.util.Scanner;
 
 public class ForegroundThread implements Runnable{
 
-    Registry registry;
-    boolean overlaySetup;
+    private Registry registry;
+    private boolean overlaySetup;
 
     public ForegroundThread(Registry registry){
         this.registry = registry;
