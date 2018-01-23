@@ -1,7 +1,8 @@
 package cs455.overlay;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -9,20 +10,31 @@ import java.net.Socket;
 public class MessagingNode implements Runnable{
 
     public static void main(String[] argv){
+        try {
+            //Create the node, which contacts the registry.
+            MessagingNode messager = new MessagingNode(argv[0], argv[1]);
+            System.out.println("Successfully connected to registry.");
 
-        //Create the node, which contacts the registry.
-        MessagingNode messager = new MessagingNode(argv[0], argv[1]);
-        System.out.println("Successfully connected to registry.");
+            //Sending first message.
+            messager.sendMessage(2);
 
-        //Sending first message.
-        messager.sendMessage(2);
+            //Receive Confirmation
+            MessageType process = new MessageType(messager.incoming);
+            process.processType3();
+        }
+        catch(IOException e){
+            System.out.println("Error encountered in main: " + e);
+        }
     }
 
 //=========================================== Messaging Node Class Start ===============================================
 
     private Socket registrySockit;
     private ServerSocket sockit;
-    private PrintWriter serverConnection;
+    private DataOutputStream outgoing;
+    private DataInputStream incoming;
+    private MessageCreator creator;
+
 
     public MessagingNode(String registryHost, String registryPort){
 
@@ -45,14 +57,16 @@ public class MessagingNode implements Runnable{
             System.exit(-1);
         }
 
-
         try{
             registrySockit = new Socket(registryHost, port);
-            serverConnection = new PrintWriter(registrySockit.getOutputStream(), true);
+            outgoing = new DataOutputStream(registrySockit.getOutputStream());
+            incoming = new DataInputStream(registrySockit.getInputStream());
         }
         catch(IOException e){
             System.out.println("Cannot create messaging node. Could not connect to registry.");
         }
+
+         creator = new MessageCreator(this);
     }
 
 
@@ -82,10 +96,40 @@ public class MessagingNode implements Runnable{
     }
 
     private void sendMessage(int type){
-        MessageCreator creator = new MessageCreator(this);
-        byte[] message = creator.createMessage(2);
-        serverConnection.print(message);
-        serverConnection.flush();       //TODO: It is my belief that this is wrong. Look into.
+        byte[] message = new byte[0];
+        switch(type){
+            case 2:
+                message = creator.createMessageType2();
+                break;
+            case 4:
+                message = creator.createMessageType4();
+                break;
+            case 7:
+                message = creator.createMessageType7();
+                break;
+            case 9:
+                message = creator.createMessageType9();
+                break;
+            case 10:
+                message = creator.createMessageType10();
+                break;
+            case 12:
+                message = creator.createMessageType12();
+                break;
+            default:
+                System.out.println("Wrong message type given to send message.");
+                System.exit(-1);
+        }
+
+        try{
+            outgoing.writeInt(message.length);
+            outgoing.write(message, 0, message.length);
+            outgoing.flush();
+        }
+        catch(IOException e){
+            System.out.println("Problem sending message." + e);
+        }
+
     }
 
 

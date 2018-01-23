@@ -3,43 +3,17 @@ package cs455.overlay;
 public class MessageCreator {
 
     private MessagingNode messager;
+    private RegistryNode registry;
 
     public MessageCreator(MessagingNode messager){
         this.messager = messager;
     }
 
-    public byte[] createMessage(int type){
-        switch(type){
-            case 2:
-                return createMessageType2();
-            case 3:
-                break;
-            case 4:
-                break;
-            case 5:
-                break;
-            case 6:
-                break;
-            case 7:
-                break;
-            case 8:
-                break;
-            case 9:
-                break;
-            case 10:
-                break;
-            case 11:
-                break;
-            case 12:
-                break;
-            default:
-                String error = "Incorrect type given. Message creator.";
-                return error.getBytes();
-        }
-        return null;
+    public MessageCreator(RegistryNode registry){
+        this.registry = registry;
     }
 
-    private byte[] createMessageType2(){
+    public byte[] createMessageType2(){
         //Type and IP length
         byte type = 2;
         byte length = (byte) messager.getIPAddress().length; //TODO could be causing trouble if there are issues with the type 2 message.
@@ -66,5 +40,45 @@ public class MessageCreator {
         return message;
     }
 
+    public byte[] createMessageType3(int nodeID){
+        byte type = 3;
+        //TODO: If nodeID is -1, send unsuccessful message.
+        return new byte[0];
+    }
 
+    public byte[] createMessageType4(){
+        return new byte[0];
+    }
+
+    public byte[] createMessageType5(){
+        return new byte[0];
+    }
+
+    public byte[] createMessageType6(){
+        return new byte[0];
+    }
+
+    public byte[] createMessageType7(){
+        return new byte[0];
+    }
+
+    public byte[] createMessageType8(){
+        return new byte[0];
+    }
+
+    public byte[] createMessageType9(){
+        return new byte[0];
+    }
+
+    public byte[] createMessageType10(){
+        return new byte[0];
+    }
+
+    public byte[] createMessageType11(){
+        return new byte[0];
+    }
+
+    public byte[] createMessageType12(){
+        return new byte[0];
+    }
 }
