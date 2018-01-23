@@ -1,5 +1,8 @@
 package cs455.overlay;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 public class MessageCreator {
 
     private MessagingNode messager;
@@ -28,6 +31,8 @@ public class MessageCreator {
             message[i] = messager.getIPAddress()[i-2];
         }
 
+        System.out.println("IP Address for sending type 2:" + Arrays.toString(messager.getIPAddress()));
+
         //Port number
         message[2 + length] = (byte) (messager.getPortNumber() >> 8);
         message[3 + length] = (byte) (messager.getPortNumber());
@@ -40,10 +45,41 @@ public class MessageCreator {
         return message;
     }
 
-    public byte[] createMessageType3(int nodeID){
-        byte type = 3;
-        //TODO: If nodeID is -1, send unsuccessful message.
-        return new byte[0];
+    public byte[] createMessageType3(int nodeID, boolean unmatchedIP){
+        String infoString;
+        if(nodeID == -1){
+            if(unmatchedIP){
+                infoString = "Registry unsuccessful. Given IP does not match the socket IP.";
+            }
+            else{
+                infoString = "Registry unsuccessful. This node has been previously registered.";
+            }
+        }
+        else{
+            infoString = "Registry successful. " + registry.getNumNodes();
+        }
+
+        byte[] bMessage = new byte[0];
+        try{
+            bMessage = infoString.getBytes("ASCII");
+        }
+        catch(IOException e){
+            System.out.println("Cannot create message type 3. " + e);
+            System.exit(-1);
+        }
+
+        //Create message
+        byte[] message = new byte[4 + bMessage.length];
+        message[0] = 3; //Type
+        message[1] = (byte)(nodeID>>8);
+        message[2] = (byte)(nodeID);
+
+        //Put bMessage in array
+        for(int i = 3; i < bMessage.length; i++){
+            message[i] = bMessage[i-3];
+        }
+
+        return message;
     }
 
     public byte[] createMessageType4(){

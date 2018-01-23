@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class RegistryNode implements Runnable{
 
@@ -13,10 +14,14 @@ public class RegistryNode implements Runnable{
     private MessageType processor;
     private MessageCreator creator;
     private int nodeID;
+    private boolean unmatchedIP;
+    private Registry registry;
 
-    public RegistryNode(Socket sockit, int nodeID){
+    public RegistryNode(Socket sockit, int nodeID, Registry registry){
         this.sockit = sockit;
         this.nodeID = nodeID;
+        this.unmatchedIP = false;
+        this.registry = registry;
     }
 
     public void run(){
@@ -29,12 +34,31 @@ public class RegistryNode implements Runnable{
             processor = new MessageType(incoming);
             processor.processType2();
 
+            System.out.println("NodeID: " + nodeID);
+
             //Register Node
-            //TODO if processor.getIP() does not equal sockit IP, set nodeID to -1. Exit thread after sending 3. (I think)
+            if(!Arrays.equals(processor.getIP(), sockit.getInetAddress().getAddress())){
+                System.out.println("Mine: " + Arrays.toString(processor.getIP()) + " \n Actuality:" + Arrays.toString(sockit.getInetAddress().getAddress()));
+                nodeID = -1;
+                unmatchedIP = true;
+            }
 
             //Create message creator & send message type 3
+            System.out.println("NodeID: " + nodeID);
             creator = new MessageCreator(this);
             sendMessage(3);
+
+            if(unmatchedIP){
+                //Close the streams.
+                outgoing.flush();
+                outgoing.close();
+                incoming.close();
+
+                //Close the socket.
+                sockit.close();
+
+                System.exit(-1);
+            }
 
             //Close the streams.
             outgoing.flush();
@@ -53,7 +77,7 @@ public class RegistryNode implements Runnable{
         byte[] message = new byte[0];
         switch(type){
             case 3:
-                message = creator.createMessageType3(nodeID);
+                message = creator.createMessageType3(nodeID, unmatchedIP);
                 break;
             case 5:
                 message = creator.createMessageType5();
@@ -81,5 +105,9 @@ public class RegistryNode implements Runnable{
             System.out.println("Problem sending message." + e);
         }
 
+    }
+
+    public int getNumNodes(){
+        return registry.getNumNodes();
     }
 }

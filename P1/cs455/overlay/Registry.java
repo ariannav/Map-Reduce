@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Random;
 
 public class Registry implements Runnable{
 
@@ -30,7 +32,8 @@ public class Registry implements Runnable{
 
     private ServerSocket sockit;
     private boolean overlayInitiated;
-    private ArrayList nodes;
+    private ArrayList<NodeContainer> nodes;
+    private Random randomGenerator;
 
 
     //Registry Constructor
@@ -38,7 +41,8 @@ public class Registry implements Runnable{
         try{
             sockit = createServerSocket();
             overlayInitiated = false;
-            nodes = new ArrayList<NodeContainer>();
+            nodes = new ArrayList<>();
+            randomGenerator = new Random();
         }
         catch(IOException e){
             System.out.println("Error encountered creating socket." + e + "\n");
@@ -86,7 +90,7 @@ public class Registry implements Runnable{
                 Socket messengerSockit = sockit.accept();
 
                 int nodeID = newNodeID(messengerSockit);
-                Thread newThread = new Thread(new RegistryNode(messengerSockit, nodeID));
+                Thread newThread = new Thread(new RegistryNode(messengerSockit, nodeID, this));
                 NodeContainer newNode = new NodeContainer(newThread, nodeID, messengerSockit.getInetAddress().getAddress());
                 nodes.add(newNode);
                 newThread.start();
@@ -109,11 +113,38 @@ public class Registry implements Runnable{
         }
     }
 
-    public int newNodeID(Socket messengerSockit){
-        //TODO: If node previously registered, return -1. (IP is already listed in node list)
-        //TODO Randomly select.
-        return 0;
+
+    public int getNumNodes(){
+        return nodes.size();
     }
+
+
+    public int newNodeID(Socket messengerSockit){
+        //If node previously registered, return -1. (IP is already listed in node list)
+        //If ID previously used, set flag.
+        byte[] ip = messengerSockit.getInetAddress().getAddress();
+        int nodeID = randomGenerator.nextInt();
+        for(int i = 0; i < nodes.size(); i++){
+            if(Arrays.equals(ip, nodes.get(i).getInetAddress())){
+                return -1;
+            }
+            if(nodeID == nodes.get(i).getNodeID()){
+                nodeID = -1;
+            }
+        }
+
+        while(nodeID == -1){
+            nodeID = randomGenerator.nextInt();
+            for(int i = 0; i < nodes.size(); i++){
+                if(nodeID == nodes.get(i).getNodeID()){
+                    nodeID = -1;
+                }
+            }
+        }
+
+        return nodeID;
+    }
+
 
     public String getMessagingNodeInfo(){
         //TODO
