@@ -55,7 +55,7 @@ public class MessageType {
 
         //Get Info String length and Info String
         byte infoStringLength = data[3];
-        infoString = Arrays.copyOfRange(data, 4, 4 + infoStringLength);
+        infoString = Arrays.copyOfRange(data, 3, 3 + infoStringLength);
     }
 
 //TODO: HAVEN'T DONE THESE =========================================================================================
