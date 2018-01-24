@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class MessagingNode implements Runnable{
 
@@ -87,6 +88,7 @@ public class MessagingNode implements Runnable{
 
 
     public byte[] getIPAddress(){
+        System.out.println("IP Address returning: "+ Arrays.toString(registrySockit.getInetAddress().getAddress()));
         return sockit.getInetAddress().getAddress();
     }
 
