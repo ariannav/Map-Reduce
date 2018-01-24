@@ -35,7 +35,8 @@ public class MessageCreator {
         //Port number
         message[2 + length] = (byte) (messager.getPortNumber() >> 8);
         message[3 + length] = (byte) (messager.getPortNumber());
-        System.out.println("NodeID Before Conversion:" + message[2+length] + " and " + message[3+length] + " and after: " + ((message[3+length])|(message[2+length]<<8)));
+        int recomposed = ((message[3+length])|(message[2+length]<<8));
+        System.out.println("NodeID Before Conversion:" + message[2+length] + " and " + message[3+length] + " and after: " + recomposed);
 
         //Sanity check
         if(arrayLength - 1 != 3 + length){
