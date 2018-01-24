@@ -131,7 +131,7 @@ public class Registry implements Runnable{
         //If node previously registered, return -1. (IP is already listed in node list)
         //If ID previously used, set flag.
         byte[] ip = messengerSockit.getInetAddress().getAddress();
-        int nodeID = randomGenerator.nextInt() % 127;
+        int nodeID = randomGenerator.nextInt(127);
         for(int i = 0; i < nodes.size(); i++){
             if(Arrays.equals(ip, nodes.get(i).getInetAddress())){
                 return -1;
@@ -142,7 +142,7 @@ public class Registry implements Runnable{
         }
 
         while(nodeID == -1){
-            nodeID = randomGenerator.nextInt() % 127;
+            nodeID = randomGenerator.nextInt(127);
             for(int i = 0; i < nodes.size(); i++){
                 if(nodeID == nodes.get(i).getNodeID()){
                     nodeID = -1;
