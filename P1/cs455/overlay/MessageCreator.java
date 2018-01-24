@@ -71,7 +71,6 @@ public class MessageCreator {
         message[0] = 3; //Type
         message[1] = (byte)(nodeID>>8);
         message[2] = (byte)(nodeID);
-        System.out.println("Node id reconstructed: " + ((message[1]<<8) | (message[2]&0xFF)));
 
         //Put bMessage in array
         for(int i = 3; i < bMessage.length+3; i++){

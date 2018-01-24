@@ -42,7 +42,6 @@ public class RegistryNode implements Runnable{
             registry.updateMyPort(nodeID, processor.getPort());
 
             //Create message creator & send message type 3
-            System.out.println("NodeID: " + nodeID);
             creator = new MessageCreator(this);
             sendMessage(3);
 
