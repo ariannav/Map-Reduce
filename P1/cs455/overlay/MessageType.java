@@ -36,7 +36,6 @@ public class MessageType {
 
         //Get port number
         port = (data[2+ipLength] << 8) | (data[3+ipLength] & 0xFF);
-        System.out.println("Processing port: " + port);
     }
 
 
@@ -48,7 +47,7 @@ public class MessageType {
 
         //Process
         lastType = data[0];
-        nodeID = (data[1] << 8) + data[2];
+        nodeID = (data[1] << 8) | (data[2] & 0xFF);
 
         if(nodeID == -1){
             throw new IOException("Message Node was not successfully registered. Status -1.");
