@@ -88,8 +88,7 @@ public class MessagingNode implements Runnable{
 
 
     public byte[] getIPAddress(){
-        System.out.println("IP Address returning: "+ Arrays.toString(registrySockit.getInetAddress().getAddress()));
-        return sockit.getInetAddress().getAddress();
+        return registrySockit.getLocalAddress().getAddress();
     }
 
 
