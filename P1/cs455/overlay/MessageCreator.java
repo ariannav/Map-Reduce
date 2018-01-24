@@ -19,7 +19,7 @@ public class MessageCreator {
     public byte[] createMessageType2(){
         //Type and IP length
         byte type = 2;
-        byte length = (byte) messager.getIPAddress().length; //TODO could be causing trouble if there are issues with the type 2 message.
+        byte length = (byte) messager.getIPAddress().length;
 
         int arrayLength = 1 + 1 + length + 2;
         byte[] message = new byte[arrayLength];
@@ -31,11 +31,11 @@ public class MessageCreator {
             message[i] = messager.getIPAddress()[i-2];
         }
 
-        System.out.println("IP Address for sending type 2:" + Arrays.toString(messager.getIPAddress()));
 
         //Port number
         message[2 + length] = (byte) (messager.getPortNumber() >> 8);
         message[3 + length] = (byte) (messager.getPortNumber());
+        System.out.println("NodeID Before Conversion:" + message[2+length] + " and " + message[3+length] + " and after: " + ((message[2+length]<<8)+message[3+length])); 
 
         //Sanity check
         if(arrayLength - 1 != 3 + length){

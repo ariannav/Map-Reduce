@@ -34,8 +34,6 @@ public class RegistryNode implements Runnable{
             processor = new MessageType(incoming);
             processor.processType2();
 
-            System.out.println("NodeID: " + nodeID);
-
             //Register Node
             if(!Arrays.equals(processor.getIP(), sockit.getInetAddress().getAddress())){
                 System.out.println("Mine: " + Arrays.toString(processor.getIP()) + " \n Actuality:" + Arrays.toString(sockit.getInetAddress().getAddress()));
