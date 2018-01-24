@@ -47,7 +47,8 @@ public class MessageType {
 
         //Process
         lastType = data[0];
-        nodeID = ((data[1]&0xFF)  << 8) | (data[2] & 0xFF);
+        nodeID = (data[1]  << 8) | (data[2] & 0xFF);
+        System.out.println("Node ID processing: " + nodeID); 
 
         if(nodeID == -1){
             throw new IOException("Message Node was not successfully registered. Status -1.");
