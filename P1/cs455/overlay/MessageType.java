@@ -35,7 +35,8 @@ public class MessageType {
         ip = Arrays.copyOfRange(data, 2, 2 + ipLength);
 
         //Get port number
-        port = (data[2+ipLength] << 8) + (data[3+ipLength]);
+        port = (data[2+ipLength] << 8) | (data[3+ipLength] & 0xFF);
+        System.out.println("Processing port: " + port);
     }
 
 

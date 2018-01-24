@@ -74,7 +74,7 @@ public class MessagingNode implements Runnable{
 
     //Opens the initial server socket and finds an acceptable port.
     private ServerSocket createServerSocket() throws IOException{
-        for(int i = 2000; i < 10000; i++){
+        for(int i = 2001; i < 10000; i++){
             try{
                 ServerSocket temp = new ServerSocket(i);
                 return temp;

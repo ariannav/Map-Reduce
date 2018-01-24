@@ -91,7 +91,8 @@ public class Registry implements Runnable{
 
                 int nodeID = newNodeID(messengerSockit);
                 Thread newThread = new Thread(new RegistryNode(messengerSockit, nodeID, this));
-                NodeContainer newNode = new NodeContainer(newThread, nodeID, messengerSockit.getInetAddress().getAddress());
+                NodeContainer newNode = new NodeContainer(newThread, nodeID, messengerSockit.getInetAddress().getAddress(), messengerSockit.getPort());
+                System.out.println("Port connected to: " + messengerSockit.getPort());
                 nodes.add(newNode);
                 newThread.start();
             }
