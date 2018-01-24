@@ -23,6 +23,7 @@ public class MessagingNode implements Runnable{
             MessageType process = new MessageType(messager.incoming);
             process.processType3();
             System.out.println("NodeID: "+ process.getNodeID());
+            System.out.println("Message: " + process.getInfoString()); 
         }
         catch(IOException e){
             System.out.println("Error encountered in main: " + e);
