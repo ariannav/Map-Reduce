@@ -27,7 +27,7 @@ public class MessageCreator {
         message[1] = length;
 
         //Put IP in array
-        for(int i = 2; i < length; i++){
+        for(int i = 2; i < length+2; i++){
             message[i] = messager.getIPAddress()[i-2];
         }
 
