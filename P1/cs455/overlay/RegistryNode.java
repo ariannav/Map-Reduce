@@ -20,7 +20,7 @@ public class RegistryNode implements Runnable{
     public RegistryNode(Socket sockit, int nodeID, Registry registry){
         this.sockit = sockit;
         this.nodeID = nodeID;
-        this.unmatchedIP = false;
+        unmatchedIP = false;
         this.registry = registry;
     }
 
@@ -36,10 +36,10 @@ public class RegistryNode implements Runnable{
 
             //Register Node
             if(!Arrays.equals(processor.getIP(), sockit.getInetAddress().getAddress())){
-                System.out.println("Mine: " + Arrays.toString(processor.getIP()) + " \n Actuality:" + Arrays.toString(sockit.getInetAddress().getAddress()));
                 nodeID = -1;
                 unmatchedIP = true;
             }
+            registry.updateMyPort(nodeID, processor.getPort());
 
             //Create message creator & send message type 3
             System.out.println("NodeID: " + nodeID);

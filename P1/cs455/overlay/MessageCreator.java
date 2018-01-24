@@ -31,12 +31,9 @@ public class MessageCreator {
             message[i] = messager.getIPAddress()[i-2];
         }
 
-
         //Port number
         message[2 + length] = (byte) (messager.getPortNumber() >> 8);
         message[3 + length] = (byte) (messager.getPortNumber());
-        int recomposed = (message[2+length] << 8) | (message[3+length] & 0xFF);
-        System.out.println("NodeID Before Conversion:" + message[2+length] + " and " + message[3+length] + " and after: " + recomposed);
 
         //Sanity check
         if(arrayLength - 1 != 3 + length){
@@ -57,7 +54,7 @@ public class MessageCreator {
             }
         }
         else{
-            infoString = "Registry successful. " + registry.getNumNodes();
+            infoString = "Registry successful. There are currently " + registry.getNumNodes() + " in the system.";
         }
 
         byte[] bMessage = new byte[0];
@@ -76,7 +73,7 @@ public class MessageCreator {
         message[2] = (byte)(nodeID);
 
         //Put bMessage in array
-        for(int i = 3; i < bMessage.length; i++){
+        for(int i = 3; i < bMessage.length+3; i++){
             message[i] = bMessage[i-3];
         }
 

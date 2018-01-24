@@ -92,7 +92,6 @@ public class Registry implements Runnable{
                 int nodeID = newNodeID(messengerSockit);
                 Thread newThread = new Thread(new RegistryNode(messengerSockit, nodeID, this));
                 NodeContainer newNode = new NodeContainer(newThread, nodeID, messengerSockit.getInetAddress().getAddress(), messengerSockit.getPort());
-                System.out.println("Port connected to: " + messengerSockit.getPort());
                 nodes.add(newNode);
                 newThread.start();
             }
@@ -119,6 +118,14 @@ public class Registry implements Runnable{
         return nodes.size();
     }
 
+    public void updateMyPort(int nodeID, int port){
+        for(int i = 0; i < nodes.size(); i++){
+            if(nodes.get(i).getNodeID() == nodeID){
+                nodes.get(i).setPort(port);
+                break;
+            }
+        }
+    }
 
     public int newNodeID(Socket messengerSockit){
         //If node previously registered, return -1. (IP is already listed in node list)

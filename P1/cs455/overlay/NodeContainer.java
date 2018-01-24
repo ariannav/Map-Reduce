@@ -25,4 +25,8 @@ public class NodeContainer {
     public byte[] getInetAddress(){
         return inetAddress;
     }
+
+    public int getPort(){ return port; }
+
+    public void setPort( int port ){ this.port = port; }
 }
