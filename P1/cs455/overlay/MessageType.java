@@ -49,36 +49,40 @@ public class MessageType {
         lastType = data[0];
         nodeID = (data[1]  << 8) | (data[2] & 0xFF);
 
-        if(nodeID == -1){
-            throw new IOException("Message Node was not successfully registered. Status -1.");
-        }
-
         //Get Info String length and Info String
         byte infoStringLength = data[3];
-        infoString = Arrays.copyOfRange(data, 3, 3 + infoStringLength);
+        infoString = Arrays.copyOfRange(data, 4, 4 + infoStringLength);
+
+        if(nodeID == -1){
+            throw new IOException("Message Node was not successfully registered. NodeID -1. " + getInfoString());
+        }
     }
 
-//TODO: HAVEN'T DONE THESE =========================================================================================
+
+    public void processType4() throws IOException{  //OVERLAY_NODE_SENDS_DEREGISTRATION
+        //Get entire message
+        int  dataLength = incoming.readInt();
+        byte[] data = new byte[dataLength];
+        incoming.readFully(data, 0, dataLength);
+
+        //Process
+        lastType = data[0];
+        if(lastType != 2){
+            throw new IOException("Incorrect message type received: " + lastType);
+        }
+
+        byte ipLength = data[1];
+        ip = Arrays.copyOfRange(data, 2, 2 + ipLength);
+
+        //Get port number
+        port = (data[2+ipLength] << 8) | (data[3+ipLength] & 0xFF);
+
+        //Get node ID
+        nodeID = (data[4+ipLength]<<8) | (data[5+ipLength] & 0xFF);
+    }
+
+    //TODO: HAVEN'T DONE THESE =========================================================================================
 /*
-    private void processType4(DataInputStream message){  //OVERLAY_NODE_SENDS_DEREGISTRATION
-        try{
-            //Get IP length and read IP into variable ip.
-            int ipLength = message.read();
-            ip = new char[ipLength];
-            message.read(ip, 0, ipLength);
-
-            //Get port number
-            port = message.read();
-
-            //Get NodeID
-            nodeID = message.read();
-            successStatus = 1;
-        }
-        catch(IOException e){
-            System.out.println("Incorrect message format. Message type 4.");
-        }
-    }
-
     private void processType5(DataInputStream message){  //REGISTRY_REPORTS_DEREGISTRATION_STATUS
         try{
             //Get successStatus

@@ -88,11 +88,7 @@ public class Registry implements Runnable{
         while(!overlayInitiated){
             try{
                 Socket messengerSockit = sockit.accept();
-
-                int nodeID = newNodeID(messengerSockit);
-                Thread newThread = new Thread(new RegistryNode(messengerSockit, nodeID, this));
-                NodeContainer newNode = new NodeContainer(newThread, nodeID, messengerSockit.getInetAddress().getAddress(), messengerSockit.getPort());
-                nodes.add(newNode);
+                Thread newThread = new Thread(new RegistryNode(messengerSockit, this));
                 newThread.start();
             }
             catch(Exception e){
@@ -103,7 +99,7 @@ public class Registry implements Runnable{
     }
 
 
-    //Closes the sockets that are open.
+    //Closes the server socket.
     private void closeServSocket(){
         try{
             sockit.close();
@@ -118,23 +114,13 @@ public class Registry implements Runnable{
         return nodes.size();
     }
 
-    public void updateMyPort(int nodeID, int port){
-        for(int i = 0; i < nodes.size(); i++){
-            if(nodes.get(i).getNodeID() == nodeID){
-                nodes.get(i).setPort(port);
-                break;
-            }
-        }
-    }
 
-    public int newNodeID(Socket messengerSockit){
-        //If node previously registered, return -1. (IP is already listed in node list)
-        //If ID previously used, set flag.
-        byte[] ip = messengerSockit.getInetAddress().getAddress();
+    public NodeContainer registerNode(byte[] ip, int port){
+        //If node previously registered, return -1. (IP is already listed in node list, and port is the same)
         int nodeID = randomGenerator.nextInt(127);
         for(int i = 0; i < nodes.size(); i++){
-            if(Arrays.equals(ip, nodes.get(i).getInetAddress())){
-                return -1;
+            if(Arrays.equals(nodes.get(i).getIPAddress(), ip) && nodes.get(i).getPort() == port){
+                return new NodeContainer(-1, ip, port);
             }
             if(nodeID == nodes.get(i).getNodeID()){
                 nodeID = -1;
@@ -150,7 +136,23 @@ public class Registry implements Runnable{
             }
         }
 
-        return nodeID;
+        NodeContainer newNode = new NodeContainer(nodeID, ip, port);
+        nodes.add(newNode);
+        return newNode;
+    }
+
+
+    public int deregisterNode(NodeContainer node){
+        //If node previously not previously registered, return -1.
+        for(int i = 0; i < nodes.size(); i++){
+            if(nodes.get(i).getNodeID() == node.getNodeID()){
+                nodes.remove(i);
+                return 1; //Success!
+            }
+        }
+
+        node.setNodeID(-1);
+        return 0; //Fail!
     }
 
 

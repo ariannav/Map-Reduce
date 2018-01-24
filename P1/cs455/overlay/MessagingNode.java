@@ -8,7 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
 
-public class MessagingNode implements Runnable{
+public class MessagingNode{
 
     public static void main(String[] argv){
         try {
@@ -22,8 +22,20 @@ public class MessagingNode implements Runnable{
             //Receive Confirmation
             MessageType process = new MessageType(messager.incoming);
             process.processType3();
-            System.out.println("NodeID: "+ process.getNodeID());
-            System.out.println("Message: " + process.getInfoString());
+            messager.nodeID = process.getNodeID();
+
+            if(messager.nodeID == -1){
+                System.out.println("Registration unsuccessful. Reason: " + process.getInfoString() + " Exiting program.");
+                messager.flushCloseExit();
+            }
+            else{
+                System.out.println(process.getInfoString() + "Assigned Node ID: " + process.getNodeID());
+            }
+
+            //Deregister
+            //TODO:Foreground should be able to call this.
+            messager.deregister();
+            //TODO: Process deregistration confirmation. 
         }
         catch(IOException e){
             System.out.println("Error encountered in main: " + e);
@@ -37,6 +49,7 @@ public class MessagingNode implements Runnable{
     private DataOutputStream outgoing;
     private DataInputStream incoming;
     private MessageCreator creator;
+    private int nodeID;
 
 
     public MessagingNode(String registryHost, String registryPort){
@@ -88,16 +101,6 @@ public class MessagingNode implements Runnable{
     }
 
 
-    public byte[] getIPAddress(){
-        return registrySockit.getLocalAddress().getAddress();
-    }
-
-
-    //Gets the port number the server socket is running on.
-    public int getPortNumber(){
-        return sockit.getLocalPort();
-    }
-
     private void sendMessage(int type){
         byte[] message = new byte[0];
         switch(type){
@@ -136,17 +139,53 @@ public class MessagingNode implements Runnable{
     }
 
 
+    private void deregister(){
+        System.out.print("Deregistering...");
+        sendMessage(4);
+    }
+
+
     public String getDiagnostics(){
         //TODO
         return "Nothing written yet!";
     }
 
+
     public void exitOverlay(){
         //TODO
     }
 
-    @Override
-    public void run() {
 
+    private void flushCloseExit(){
+        try{
+            //Close the streams.
+            outgoing.flush();
+            outgoing.close();
+            incoming.close();
+
+            //Close the socket.
+            sockit.close();
+        }
+        catch (IOException e){
+            System.exit(-1);
+        }
+        System.exit(0);
+    }
+
+
+    public byte[] getIPAddress(){
+        return registrySockit.getLocalAddress().getAddress();
+    }
+
+
+    //Gets the port number the server socket is running on.
+    public int getPortNumber(){
+        return sockit.getLocalPort();
+    }
+
+
+    //Returns the assigned nodeID
+    public int getNodeID(){
+        return nodeID;
     }
 }

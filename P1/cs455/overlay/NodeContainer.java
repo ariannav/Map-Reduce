@@ -2,31 +2,26 @@ package cs455.overlay;
 
 public class NodeContainer {
 
-    private Thread thread;
     private int nodeID;
     private byte[] inetAddress;
     private int port;
 
-    public NodeContainer(Thread thread, int nodeID, byte[] inetAddress, int port){
-        this.thread = thread;
+    public NodeContainer(int nodeID, byte[] inetAddress, int port){
         this.nodeID = nodeID;
         this.inetAddress = inetAddress;
         this.port = port;
-    }
-
-    public Thread getThread(){
-        return thread;
     }
 
     public int getNodeID(){
         return nodeID;
     }
 
-    public byte[] getInetAddress(){
+    public void setNodeID(int id){ nodeID = id; }
+
+    public byte[] getIPAddress(){
         return inetAddress;
     }
 
     public int getPort(){ return port; }
 
-    public void setPort( int port ){ this.port = port; }
 }
