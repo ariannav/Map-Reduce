@@ -39,8 +39,7 @@ public class RegistryNode implements Runnable{
             processor.processType2();
 
             //Register and send type 3.
-            register();
-            sendMessage(3);     //Success!
+            register(); //Sends message type 3.
         }
         catch(IOException e){
             System.err.println("Error: Rare occurrence of Messenger Node failing after registration request. Node was not registered. Exiting. ");
@@ -75,6 +74,10 @@ public class RegistryNode implements Runnable{
             nodeID = thisNode.getNodeID();
             sendMessage(3);
             flushCloseExit();
+        }
+        else{
+            nodeID =  thisNode.getNodeID();
+            sendMessage(3);
         }
     }
 
@@ -115,7 +118,7 @@ public class RegistryNode implements Runnable{
                 break;
             default:
                 System.out.println("Wrong message type given to send message.");
-                System.exit(-1);
+                flushCloseExit();
         }
 
         outgoing.writeInt(message.length);
@@ -138,8 +141,8 @@ public class RegistryNode implements Runnable{
             sockit.close();
         }
         catch (IOException e){
-            System.exit(-1);
+            Thread.currentThread().interrupt();
         }
-        System.exit(0);
+        Thread.currentThread().interrupt();
     }
 }

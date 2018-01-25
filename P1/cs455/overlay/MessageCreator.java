@@ -77,10 +77,10 @@ public class MessageCreator {
     }
 
     public byte[] createMessageType4(){
-        int length = messager.getIPAddress().length;
+        byte length = (byte) messager.getIPAddress().length;
         byte[] message = new byte[6 + length];
         message[0] = 4;
-        message[1] = (byte) length;
+        message[1] = length;
 
         //Put IP in array
         for(int i = 2; i < length+2; i++){

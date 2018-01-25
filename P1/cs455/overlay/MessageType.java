@@ -67,7 +67,7 @@ public class MessageType {
 
         //Process
         lastType = data[0];
-        if(lastType != 2){
+        if(lastType != 4){
             throw new IOException("Incorrect message type received: " + lastType);
         }
 
@@ -81,23 +81,25 @@ public class MessageType {
         nodeID = (data[4+ipLength]<<8) | (data[5+ipLength] & 0xFF);
     }
 
-    //TODO: HAVEN'T DONE THESE =========================================================================================
-/*
-    private void processType5(DataInputStream message){  //REGISTRY_REPORTS_DEREGISTRATION_STATUS
-        try{
-            //Get successStatus
-            successStatus = message.read();
 
-            //Get Info String length and Info String
-            int infoStringLength = message.read();
-            infoString = new char[infoStringLength];
-            message.read(infoString, 0, infoStringLength);
-        }
-        catch(IOException e){
-            System.out.println("Incorrect message format. Message type 5.");
-        }
+    public void processType5() throws IOException{  //REGISTRY_REPORTS_DEREGISTRATION_STATUS
+        //Get entire message
+        int  dataLength = incoming.readInt();
+        byte[] data = new byte[dataLength];
+        incoming.readFully(data, 0, dataLength);
+
+        //Process
+        lastType = data[0];
+        nodeID = (data[1]  << 8) | (data[2] & 0xFF);
+
+        //Get Info String length and Info String
+        byte infoStringLength = data[3];
+        infoString = Arrays.copyOfRange(data, 4, 4 + infoStringLength);
+
     }
 
+    //TODO: HAVEN'T DONE THESE =========================================================================================
+/*
     private void processType6(DataInputStream message){  //TODO: REGISTRY_SENDS_NODE_MANIFEST
         try{
             //Get IP length and read IP into variable ip.

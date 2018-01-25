@@ -29,13 +29,13 @@ public class MessagingNode{
                 messager.flushCloseExit();
             }
             else{
-                System.out.println(process.getInfoString() + "Assigned Node ID: " + process.getNodeID());
+                System.out.println(process.getInfoString() + " Assigned Node ID: " + process.getNodeID());
             }
 
             //Deregister
             //TODO:Foreground should be able to call this.
-            messager.deregister();
-            //TODO: Process deregistration confirmation. 
+            messager.deregister(process);
+
         }
         catch(IOException e){
             System.out.println("Error encountered in main: " + e);
@@ -70,7 +70,7 @@ public class MessagingNode{
         }
         catch(Exception e){
             System.out.println("Provided IP address and/or port is not reachable. Please provide a valid IP address/port.");
-            System.exit(-1);
+            flushCloseExit();
         }
 
         try{
@@ -124,7 +124,7 @@ public class MessagingNode{
                 break;
             default:
                 System.out.println("Wrong message type given to send message.");
-                System.exit(-1);
+                flushCloseExit();
         }
 
         try{
@@ -139,9 +139,27 @@ public class MessagingNode{
     }
 
 
-    private void deregister(){
+    private void deregister(MessageType process){
         System.out.print("Deregistering...");
         sendMessage(4);
+        try{
+            process.processType5();
+        }
+        catch(IOException e){
+            System.out.println("Problem deregistering. Unable to process deregistration confirmation.");
+            flushCloseExit();
+        }
+
+        nodeID = process.getNodeID();
+
+        if(nodeID == -1){
+            System.out.println("Deregistration unsuccessful. Reason: " + process.getInfoString() + " Exiting program.");
+            flushCloseExit();
+        }
+        else{
+            System.out.println(process.getInfoString());
+        }
+
     }
 
 
