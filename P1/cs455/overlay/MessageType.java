@@ -19,6 +19,8 @@ public class MessageType {
             lastType = 0;
     }
 
+    //====================================RECEIVED BY REGISTRY NODE=====================================================
+
     public void processType2() throws IOException{ //OVERLAY_NODE_SENDS_REGISTRATION
         //Get entire message
         int  dataLength = incoming.readInt();
@@ -38,6 +40,93 @@ public class MessageType {
         port = (data[2+ipLength] << 8) | (data[3+ipLength] & 0xFF);
     }
 
+
+    public void processVariableFromMessenger() throws IOException{
+        //Get entire message
+        int  dataLength = incoming.readInt();
+        byte[] data = new byte[dataLength];
+        incoming.readFully(data, 0, dataLength);
+
+        lastType = data[0];
+
+        switch(lastType){
+            case 4:
+                processType4(data);
+                break;
+            case 7:
+                processType7(data);
+                break;
+            case 10:
+                //processType10(data);
+                break;
+            case 12:
+                //processType12(data);
+                break;
+            default:
+                throw new IOException("Incorrect type number. Type received: " + lastType);
+        }
+    }
+
+
+    public void processType4(byte[] data) throws IOException{  //OVERLAY_NODE_SENDS_DEREGISTRATION
+        if(lastType != 4){
+            throw new IOException("Incorrect message type received: " + lastType);
+        }
+
+        byte ipLength = data[1];
+        ip = Arrays.copyOfRange(data, 2, 2 + ipLength);
+
+        //Get port number
+        port = (data[2+ipLength] << 8) | (data[3+ipLength] & 0xFF);
+    }
+
+
+    private void processType7(byte[] data) throws IOException{  //NODE_REPORTS_OVERLAY_SETUP_STATUS
+        //Get node ID
+        nodeID = (data[1]<<8) | (data[2] & 0xFF);
+
+        byte length = data[3];
+        infoString = Arrays.copyOfRange(data, 4, 4 + length);
+
+        if(nodeID == -1 ) {
+            throw new IOException("Node was unable to setup overlay. " + infoString);
+        }
+    }
+
+    /*
+    private void processType10(byte[] data) throws IOException{  //TODO: OVERLAY_NODE_REPORTS_TASK_FINISHED
+        try{
+            //Get IP length and read IP into variable ip.
+            int ipLength = message.read();
+            ip = new char[ipLength];
+            message.read(ip);
+
+            //Get port number
+            port = message.read();
+        }
+        catch(IOException e){
+            System.out.println("Incorrect message format. Message type 2.");
+        }
+    }
+
+
+    private void processType12(byte[] data) throws IOException{  //TODO: OVERLAY_NODE_REPORTS_TRAFFIC_SUMMARY
+        try{
+            //Get IP length and read IP into variable ip.
+            int ipLength = message.read();
+            ip = new char[ipLength];
+            message.read(ip);
+
+            //Get port number
+            port = message.read();
+        }
+        catch(IOException e){
+            System.out.println("Incorrect message format. Message type 2.");
+        }
+    }
+    */
+
+    //=============================RECEIVED BY THE MESSENGER NODE=======================================================
 
     public void processType3() throws IOException{ //REGISTRY_REPORTS_REGISTRATION_STATUS
         //Get entire message
@@ -59,29 +148,6 @@ public class MessageType {
     }
 
 
-    public void processType4() throws IOException{  //OVERLAY_NODE_SENDS_DEREGISTRATION
-        //Get entire message
-        int  dataLength = incoming.readInt();
-        byte[] data = new byte[dataLength];
-        incoming.readFully(data, 0, dataLength);
-
-        //Process
-        lastType = data[0];
-        if(lastType != 4){
-            throw new IOException("Incorrect message type received: " + lastType);
-        }
-
-        byte ipLength = data[1];
-        ip = Arrays.copyOfRange(data, 2, 2 + ipLength);
-
-        //Get port number
-        port = (data[2+ipLength] << 8) | (data[3+ipLength] & 0xFF);
-
-        //Get node ID
-        nodeID = (data[4+ipLength]<<8) | (data[5+ipLength] & 0xFF);
-    }
-
-
     public void processType5() throws IOException{  //REGISTRY_REPORTS_DEREGISTRATION_STATUS
         //Get entire message
         int  dataLength = incoming.readInt();
@@ -98,8 +164,7 @@ public class MessageType {
 
     }
 
-    //TODO: HAVEN'T DONE THESE =========================================================================================
-/*
+    /*
     private void processType6(DataInputStream message){  //TODO: REGISTRY_SENDS_NODE_MANIFEST
         try{
             //Get IP length and read IP into variable ip.
@@ -115,20 +180,6 @@ public class MessageType {
         }
     }
 
-    private void processType7(DataInputStream message){  //TODO: NODE_REPORTS_OVERLAY_SETUP_STATUS
-        try{
-            //Get IP length and read IP into variable ip.
-            int ipLength = message.read();
-            ip = new char[ipLength];
-            message.read(ip);
-
-            //Get port number
-            port = message.read();
-        }
-        catch(IOException e){
-            System.out.println("Incorrect message format. Message type 2.");
-        }
-    }
 
     private void processType8(DataInputStream message){  //TODO: REGISTRY_REQUESTS_TASK_INITIATE
         try{
@@ -145,35 +196,6 @@ public class MessageType {
         }
     }
 
-    private void processType9(DataInputStream message){  //TODO: OVERLAY_NODE_SENDS_DATA
-        try{
-            //Get IP length and read IP into variable ip.
-            int ipLength = message.read();
-            ip = new char[ipLength];
-            message.read(ip);
-
-            //Get port number
-            port = message.read();
-        }
-        catch(IOException e){
-            System.out.println("Incorrect message format. Message type 2.");
-        }
-    }
-
-    private void processType10(DataInputStream message){  //TODO: OVERLAY_NODE_REPORTS_TASK_FINISHED
-        try{
-            //Get IP length and read IP into variable ip.
-            int ipLength = message.read();
-            ip = new char[ipLength];
-            message.read(ip);
-
-            //Get port number
-            port = message.read();
-        }
-        catch(IOException e){
-            System.out.println("Incorrect message format. Message type 2.");
-        }
-    }
 
     private void processType11(DataInputStream message){  //TODO: REGISTRY_REQUESTS_TRAFFIC_SUMMARY
         try{
@@ -189,8 +211,12 @@ public class MessageType {
             System.out.println("Incorrect message format. Message type 2.");
         }
     }
+    */
 
-    private void processType12(DataInputStream message){  //TODO: OVERLAY_NODE_REPORTS_TRAFFIC_SUMMARY
+    //=================================FROM MESSENGER TO MESSENGER======================================================
+
+    /*
+    private void processType9(DataInputStream message){  //TODO: OVERLAY_NODE_SENDS_DATA
         try{
             //Get IP length and read IP into variable ip.
             int ipLength = message.read();
@@ -204,9 +230,7 @@ public class MessageType {
             System.out.println("Incorrect message format. Message type 2.");
         }
     }
-
     */
-    //TODO: HAVEN'T DONE ABOVE==========================================================================================
 
     /*
     private int typeNumber;

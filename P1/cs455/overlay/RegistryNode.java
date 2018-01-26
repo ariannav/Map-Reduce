@@ -46,18 +46,33 @@ public class RegistryNode implements Runnable{
             flushCloseExit();
         }
 
-        //Deregistration interchange
-        try{
-            processor.processType4();
-            deregister();
-            sendMessage(5);     //Success!
-            flushCloseExit();
-        }
-        catch(IOException e){
-            System.err.println("Unable to deregister node. Exiting. ");
-            flushCloseExit();
-        }
+        //Could be MT 4, 7, 10, or 12 responding.
+        while(true){
+            try{
+                processor.processVariableFromMessenger();
+                int type = processor.getLastTypeReceived();
+                if(type == 4){
+                    //Deregister
+                    deregister();
+                    sendMessage(5);     //Success!
+                    flushCloseExit();
+                }
+                else if(type == 7){
+                    //Node reported overlay setup status
+                }
+                else if(type == 10){
+                    //Overlay node reports task finished
+                }
+                else if(type == 12){
+                    //Overlay node reports traffic summary.
+                }
 
+            }
+            catch(IOException e){
+                System.err.println(e);
+                flushCloseExit();
+            }
+        }
     }
 
     private void register() throws IOException{
@@ -126,6 +141,12 @@ public class RegistryNode implements Runnable{
         outgoing.write(message, 0, message.length);
         outgoing.flush();
     }
+
+
+    public void setupOverlay(){
+        //TODO
+    }
+
 
     public int getNumNodes(){
         return registry.getNumNodes();

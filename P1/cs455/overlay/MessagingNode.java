@@ -33,8 +33,8 @@ public class MessagingNode{
             }
 
             //TODO: Add foreground thread, which should be able to call deregister
-
-
+            Thread server = new Thread(new MNServer(messager, messager.sockit));
+            server.start();
 
         }
         catch(Exception e){
