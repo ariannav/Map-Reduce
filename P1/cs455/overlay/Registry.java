@@ -6,9 +6,10 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Random;
 
-public class Registry implements Runnable{
+public class Registry implements Comparator<NodeContainer>{
 
     public static void main(String[] argv){
         //Create registry, opens socket and finds port number.
@@ -31,16 +32,15 @@ public class Registry implements Runnable{
     //==============================================Start Registry Class================================================
 
     private ServerSocket sockit;
-    private boolean overlayInitiated;
     private ArrayList<NodeContainer> nodes;
     private Random randomGenerator;
+    private ArrayList<RegistryNode> registries;
 
 
     //Registry Constructor
     public Registry(){
         try{
             sockit = createServerSocket();
-            overlayInitiated = false;
             nodes = new ArrayList<>();
             randomGenerator = new Random();
         }
@@ -85,7 +85,7 @@ public class Registry implements Runnable{
 
     //Listens for incoming connections, this should be going on throughout the entire program.
     private void listen(){
-        while(!overlayInitiated){
+        while(true){
             try{
                 Socket messengerSockit = sockit.accept();
                 Thread newThread = new Thread(new RegistryNode(messengerSockit, this));
@@ -115,12 +115,12 @@ public class Registry implements Runnable{
     }
 
 
-    public NodeContainer registerNode(byte[] ip, int port){
+    public NodeContainer registerNode(byte[] ip, int port, String hostname, RegistryNode registry){
         //If node previously registered, return -1. (IP is already listed in node list, and port is the same)
         int nodeID = randomGenerator.nextInt(127);
         for(int i = 0; i < nodes.size(); i++){
             if(Arrays.equals(nodes.get(i).getIPAddress(), ip) && nodes.get(i).getPort() == port){
-                return new NodeContainer(-1, ip, port);
+                return new NodeContainer(-1, ip, port, hostname);
             }
             if(nodeID == nodes.get(i).getNodeID()){
                 nodeID = -1;
@@ -136,8 +136,9 @@ public class Registry implements Runnable{
             }
         }
 
-        NodeContainer newNode = new NodeContainer(nodeID, ip, port);
+        NodeContainer newNode = new NodeContainer(nodeID, ip, port, hostname);
         nodes.add(newNode);
+        registries.add(registry);
         return newNode;
     }
 
@@ -157,33 +158,61 @@ public class Registry implements Runnable{
 
 
     public String getMessagingNodeInfo(){
-        //TODO 
-        return "Nothing yet! Hi Colton!";
+        if(nodes.size() == 0){
+            return "There are currently no registered nodes.\n";
+        }
+        String infoString = "";
+        for(int i = 0; i < nodes.size(); i++){
+            infoString += "Node: " + nodes.get(i).getNodeID() +
+                          " \tHostname: " + nodes.get(i).getHostname() +
+                          " \tPort: " + nodes.get(i).getPort() + "\n";
+        }
+        return infoString + "Total number: " + nodes.size() + "\n";
     }
 
 
     public void setupOverlay(int numEntries){
-        overlayInitiated = true;
-        //TODO Make sure to realize that the server socket is now no longer listening. Assumption in README? Should this be the case?
-        //TODO Look at threads, if any are dead, the nodes should not be included.
-        return;
+        nodes.sort(this::compare);  //Sorting the nodes by NodeID
+
+        for(int i = 0; i < nodes.size(); i++){  //For each node
+            ArrayList<NodeContainer> overlay = new ArrayList<>(numEntries);
+            for(int nodesAway = 1; nodesAway < Math.pow(2, numEntries); nodesAway *= 2){
+                int index = (i + nodesAway) % nodes.size();
+                if(index == i){ index++; }
+                overlay.add(nodes.get(index));
+            }
+
+            nodes.get(i).setOverlay(overlay);
+        }
+
+        //Sending messages to nodes
+        for(int j = 0; j < registries.size(); j++){
+            registries.get(j).setupOverlay();
+        }
+    }
+
+
+    @Override
+    public int compare(NodeContainer n1, NodeContainer n2){
+        Integer n1ID = n1.getNodeID();
+        Integer n2ID = n2.getNodeID();
+        return n1ID.compareTo(n2ID);
     }
 
 
     public String getRoutingTables(){
-        //TODO
-        return null;
+        String routingTables = "";
+        for(int i = 0; i < nodes.size(); i++){
+            routingTables += "Routing Table of Node: " + nodes.get(i).getNodeID() + "\n"
+                          +  nodes.get(i).getRoutingTableString() + "\n\n";
+        }
+        return routingTables;
     }
 
 
     public void startSendingMessages(int numMessages){
         //TODO
         return;
-    }
-
-
-    public void run() {
-        //TODO no use for this yet.
     }
 
 }

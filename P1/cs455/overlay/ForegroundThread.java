@@ -37,7 +37,7 @@ public class ForegroundThread implements Runnable{
                     break;
                 case "list-routing-tables":
                     if(overlaySetup){
-                        System.out.println(registry.getRoutingTables());
+                        System.out.print(registry.getRoutingTables());
                     }
                     else{
                         System.out.println("Overlay has not been set up. Please set up overlay before listing routing tables. ");

@@ -32,12 +32,12 @@ public class MessagingNode{
                 System.out.println(process.getInfoString() + " Assigned Node ID: " + process.getNodeID());
             }
 
-            //Deregister
-            //TODO:Foreground should be able to call this.
-            messager.deregister(process);
+            //TODO: Add foreground thread, which should be able to call deregister
+
+
 
         }
-        catch(IOException e){
+        catch(Exception e){
             System.out.println("Error encountered in main: " + e);
         }
     }

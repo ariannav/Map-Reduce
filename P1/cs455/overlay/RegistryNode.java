@@ -69,7 +69,8 @@ public class RegistryNode implements Runnable{
             sendMessage(3);
             flushCloseExit();
         }
-        else if((thisNode = registry.registerNode(processor.getIP(), processor.getPort())).getNodeID() == -1){
+        else if((thisNode = registry.registerNode(processor.getIP(), processor.getPort(),
+                sockit.getInetAddress().getLocalHost().toString(), this)).getNodeID() == -1){
             //Register
             nodeID = thisNode.getNodeID();
             sendMessage(3);
