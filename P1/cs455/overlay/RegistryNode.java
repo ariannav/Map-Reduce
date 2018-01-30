@@ -53,10 +53,9 @@ public class RegistryNode implements Runnable{
                 int type = processor.getLastTypeReceived();
                 if(type == 4){
                     //Deregister
-                    System.out.println("Here!");
                     deregister();
                     sendMessage(5);     //Success!
-                    flushCloseExit();
+                    throw new IOException();
                 }
                 else if(type == 7){
                     //TODO: Node reported overlay setup status
@@ -70,7 +69,7 @@ public class RegistryNode implements Runnable{
 
             }
             catch(IOException e){
-                System.err.println(e);
+                Thread.currentThread().interrupt();
                 flushCloseExit();
             }
         }
@@ -169,7 +168,7 @@ public class RegistryNode implements Runnable{
             //Close the socket.
             sockit.close();
         }
-        catch (IOException e){
+        catch (Exception e){
             Thread.currentThread().interrupt();
         }
         Thread.currentThread().interrupt();

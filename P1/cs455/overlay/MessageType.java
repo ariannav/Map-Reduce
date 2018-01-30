@@ -148,14 +148,35 @@ public class MessageType {
     }
 
 
-    public void processType5() throws IOException{  //REGISTRY_REPORTS_DEREGISTRATION_STATUS
+    public void processVariableFromRegistry() throws IOException{
         //Get entire message
         int  dataLength = incoming.readInt();
         byte[] data = new byte[dataLength];
         incoming.readFully(data, 0, dataLength);
 
-        //Process
         lastType = data[0];
+
+        switch(lastType){
+            case 5:
+                processType5(data);
+                break;
+            case 6:
+                processType6(data);
+                break;
+            case 8:
+                //processType8(data);
+                break;
+            case 11:
+                //processType11(data);
+                break;
+            default:
+                throw new IOException("Incorrect type number. Type received: " + lastType);
+        }
+    }
+
+
+    public void processType5(byte[] data){  //REGISTRY_REPORTS_DEREGISTRATION_STATUS
+
         nodeID = (data[1]  << 8) | (data[2] & 0xFF);
 
         //Get Info String length and Info String
@@ -165,14 +186,8 @@ public class MessageType {
     }
 
 
-    public void processType6() throws IOException{  //TODO: REGISTRY_SENDS_NODE_MANIFEST
-        //Get entire message
-        int  dataLength = incoming.readInt();
-        byte[] data = new byte[dataLength];
-        incoming.readFully(data, 0, dataLength);
+    public void processType6(byte[] data){  //TODO: REGISTRY_SENDS_NODE_MANIFEST
 
-        //Process
-        lastType = data[0];
         nodeID = (data[1]  << 8) | (data[2] & 0xFF);
 
         //Get Info String length and Info String

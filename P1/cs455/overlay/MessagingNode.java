@@ -36,7 +36,7 @@ public class MessagingNode{
             Thread server = new Thread(new MNServer(messager, messager.sockit));        //Ready to accept connections.
             server.start();
 
-            messager.process.processType6(); //TODO
+            messager.waitForMessage();
         }
         catch(Exception e){
             System.out.println("Error encountered in main: " + e);
@@ -142,27 +142,41 @@ public class MessagingNode{
     }
 
 
-    private void deregister(MessageType process){
-        System.out.print("Deregistering...");
-        sendMessage(4);
-        try{
-            process.processType5();
-        }
-        catch(IOException e){
-            System.out.println("Problem deregistering. Unable to process deregistration confirmation.");
-            flushCloseExit();
-        }
+    private void waitForMessage(){
+        //Could be MT 5, 6, 8, or 11 responding.
+        while(true){
+            try{
+                process.processVariableFromRegistry();
+                int type = process.getLastTypeReceived();
+                if(type == 5){
+                    //Asked to deregister. Hearing back.
+                    nodeID = process.getNodeID();
+                    if(nodeID == -1){
+                        System.out.println("Deregistration unsuccessful. Reason: " + process.getInfoString() + " Exiting program.");
+                        flushCloseExit();
+                    }
+                    else{
+                        System.out.println(process.getInfoString());
+                    }
+                    flushCloseExit();
+                }
+                else if(type == 6){
+                    //TODO: Registry Sent Node Manifest
+                }
+                else if(type == 8){
+                    //TODO: Registry requests task initiative
+                }
+                else if(type == 11){
+                    //TODO: Registry requests traffic summary.
+                }
 
-        nodeID = process.getNodeID();
-
-        if(nodeID == -1){
-            System.out.println("Deregistration unsuccessful. Reason: " + process.getInfoString() + " Exiting program.");
-            flushCloseExit();
+            }
+            catch(IOException e){
+                System.err.println(e);
+                System.exit(1);
+                flushCloseExit();
+            }
         }
-        else{
-            System.out.println(process.getInfoString());
-        }
-
     }
 
 
@@ -173,8 +187,8 @@ public class MessagingNode{
 
 
     public void exitOverlay(){
-        deregister(process);
-
+        System.out.print("Deregistering...");
+        sendMessage(4);
     }
 
 

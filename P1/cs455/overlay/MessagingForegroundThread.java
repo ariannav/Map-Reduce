@@ -28,7 +28,6 @@ public class MessagingForegroundThread implements Runnable{
                     break;
                 case "exit-overlay":
                     messager.exitOverlay();
-                    System.out.println("Successfully exited overlay. Exiting program.");
                     done = true;
                     break;
                 default:
