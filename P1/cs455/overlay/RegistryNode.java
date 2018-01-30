@@ -55,10 +55,10 @@ public class RegistryNode implements Runnable{
                     //Deregister
                     deregister();
                     sendMessage(5);     //Success!
-                    throw new IOException();
+                    throw new IOException("interrupt");
                 }
                 else if(type == 7){
-                    //TODO: Node reported overlay setup status
+                    //TODO: Node reported overlay setup status, add to list of ready nodes.
                 }
                 else if(type == 10){
                     //TODO: Overlay node reports task finished
@@ -69,8 +69,13 @@ public class RegistryNode implements Runnable{
 
             }
             catch(IOException e){
-                Thread.currentThread().interrupt();
-                flushCloseExit();
+                if(e.toString().equals("interrupt")){
+                    Thread.currentThread().interrupt();
+                }
+                else{
+                    System.out.println(e);
+                    flushCloseExit();
+                }
             }
         }
     }

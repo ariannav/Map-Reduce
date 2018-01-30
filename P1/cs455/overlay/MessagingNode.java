@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MessagingNode{
@@ -54,6 +55,7 @@ public class MessagingNode{
     private MessageType process;
     private boolean inProgress;
     private boolean isFinished;
+    private ArrayList<MNEndpoint> mnEndpoints;
 
 
     public MessagingNode(String registryHost, String registryPort){
@@ -166,7 +168,9 @@ public class MessagingNode{
                 }
                 else if(type == 6){
                     inProgress = true;
-                    //TODO: Actually start sending messages to other routers
+                    initiateConnections();
+                    sendMessage(7);
+                    //TODO: Wait for messaging request 
                 }
                 else if(type == 8){
                     //TODO: Registry requests task initiative
@@ -208,6 +212,25 @@ public class MessagingNode{
     public String getDiagnostics(){
         //TODO
         return "Nothing written yet!";
+    }
+
+
+    private void initiateConnections(){
+        NodeContainer[] overlay = process.getOverlay();
+        for(int i = 0; i < overlay.length; i++){
+            Thread newThread = new Thread(new MNEndpoint(this, overlay[i]));
+            newThread.start();
+        }
+    }
+
+
+    public void endpointIsReady(MNEndpoint mne, int nodeID){
+        for(int i = 0; i < process.getOverlay().length; i++){
+            if(nodeID == process.getOverlay()[i].getNodeID()){
+                process.getOverlay()[i].setEndpoint(mne);
+                break;
+            }
+        }
     }
 
 

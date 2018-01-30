@@ -2,7 +2,6 @@ package cs455.overlay;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MessageCreator {
 
@@ -168,7 +167,30 @@ public class MessageCreator {
     }
 
     public byte[] createMessageType7(){
-        return new byte[0];
+        String infoString = "Overlay setup success.";
+
+        byte[] bMessage = new byte[0];
+        try{
+            bMessage = infoString.getBytes("ASCII");
+        }
+        catch(IOException e){
+            System.out.println("Cannot create message type 7. " + e);
+            System.exit(-1);
+        }
+
+        //Create message
+        byte[] message = new byte[4 + bMessage.length];
+        message[0] = 7; //Type
+        message[1] = (byte)(messager.getNodeID()>>8);
+        message[2] = (byte)(messager.getNodeID());
+        message[3] = (byte) bMessage.length;
+
+        //Put bMessage in array
+        for(int i = 4; i < bMessage.length+4; i++){
+            message[i] = bMessage[i-4];
+        }
+
+        return message;
     }
 
     public byte[] createMessageType8(){

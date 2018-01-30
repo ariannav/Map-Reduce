@@ -9,6 +9,7 @@ public class NodeContainer{
     private int port;
     private String hostname;
     private ArrayList<NodeContainer> overlay;
+    private MNEndpoint endpoint;
 
     public NodeContainer(int nodeID, byte[] inetAddress, int port, String hostname){
         this.nodeID = nodeID;
@@ -48,4 +49,13 @@ public class NodeContainer{
         return routingTable;
     }
 
+
+    public void setEndpoint(MNEndpoint endpoint){
+        this.endpoint = endpoint;
+    }
+
+
+    public MNEndpoint getEndpoint() {
+        return endpoint;
+    }
 }
