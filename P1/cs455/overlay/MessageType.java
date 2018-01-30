@@ -3,6 +3,7 @@ package cs455.overlay;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MessageType {
@@ -13,6 +14,8 @@ public class MessageType {
     private byte[] infoString;
     private int nodeID;
     private DataInputStream incoming;
+    private NodeContainer[] overlay;
+    private int[] nodeIDs;
 
     public MessageType(DataInputStream incoming){
             this.incoming = incoming;
@@ -186,13 +189,23 @@ public class MessageType {
     }
 
 
-    public void processType6(byte[] data){  //TODO: REGISTRY_SENDS_NODE_MANIFEST
-
-        nodeID = (data[1]  << 8) | (data[2] & 0xFF);
-
-        //Get Info String length and Info String
-        byte infoStringLength = data[3];
-        infoString = Arrays.copyOfRange(data, 4, 4 + infoStringLength);
+    public void processType6(byte[] data){ //REGISTRY_SENDS_NODE_MANIFEST
+        byte routingTableSize = data[1];
+        overlay = new NodeContainer[routingTableSize];
+        int i = 2;
+        for(int j = 0; j < routingTableSize; j++){
+            int nodeID = (data[i] << 8) | (data[i+1] & 0xFF); i++; i++;
+            byte ipLength = data[i]; i++;
+            byte[] nodeIP = Arrays.copyOfRange(data, i, i + ipLength); i += ipLength;
+            int port = (data[i] << 8) | (data[i+1] & 0xFF); i++; i++;
+            NodeContainer node = new NodeContainer(nodeID, nodeIP, port, "");
+            overlay[j] = node;
+        }
+        byte numNodes = data[i]; i++;
+        nodeIDs = new int[numNodes];
+        for(int j = 0; j < numNodes; j++){
+            nodeIDs[j] = (data[i] << 8) | (data[i+1] & 0xFF); i += 2;
+        }
     }
 
     /*
@@ -248,12 +261,14 @@ public class MessageType {
     */
 
     /*
-    private int typeNumber;
-    private byte[] ip;
-    private int port;
-    private int successStatus;
-    private byte[] infoString;
-    private int nodeID;
+    private byte[] ip;                          X
+    private int port;                           X
+    private byte lastType;                      X
+    private byte[] infoString;                  X
+    private int nodeID;                         X
+    private DataInputStream incoming;           X
+    private NodeContainer[] overlay;            X
+    private int[] nodeIDs;                      X
      */
 
     public int getLastTypeReceived(){
@@ -280,5 +295,13 @@ public class MessageType {
 
     public int getNodeID(){
         return nodeID;
+    }
+
+    public NodeContainer[] getOverlay() {
+        return overlay;
+    }
+
+    public int[] getNodeIDs() {
+        return nodeIDs;
     }
 }

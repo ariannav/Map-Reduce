@@ -52,6 +52,8 @@ public class MessagingNode{
     private MessageCreator creator;
     private int nodeID;
     private MessageType process;
+    private boolean inProgress;
+    private boolean isFinished;
 
 
     public MessagingNode(String registryHost, String registryPort){
@@ -86,6 +88,8 @@ public class MessagingNode{
         }
          process =  new MessageType(incoming);
          creator = new MessageCreator(this);
+         inProgress = false;
+         isFinished = false;
     }
 
 
@@ -161,10 +165,12 @@ public class MessagingNode{
                     flushCloseExit();
                 }
                 else if(type == 6){
-                    //TODO: Registry Sent Node Manifest
+                    inProgress = true;
+                    //TODO: Actually start sending messages to other routers
                 }
                 else if(type == 8){
                     //TODO: Registry requests task initiative
+                    //TODO: Set isFinished = true and inProgress = false when done.
                 }
                 else if(type == 11){
                     //TODO: Registry requests traffic summary.
@@ -177,6 +183,25 @@ public class MessagingNode{
                 flushCloseExit();
             }
         }
+    }
+
+    public String printRoutingTable(){
+        String routingTable = "NodeID: " + nodeID + "\nDistance\t| NodeID \n";
+        for(int i = 0; i < process.getOverlay().length; i++){
+            routingTable += Math.pow(2, i) + "\t| " +  process.getOverlay()[i].getNodeID() + "\n";
+        }
+        routingTable += "Size: " + process.getOverlay().length + "\n\n";
+        return routingTable;
+    }
+
+
+    public boolean isInProgress(){
+        return inProgress;
+    }
+
+
+    public boolean isFinished(){
+        return isFinished;
     }
 
 

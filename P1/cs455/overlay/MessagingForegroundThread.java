@@ -24,11 +24,26 @@ public class MessagingForegroundThread implements Runnable{
 
             switch (word[0]) {
                 case "print-counters-and-diagnostics":
+                    if(messager.isInProgress() || !messager.isFinished()){
+                        System.out.println("Cannot print diagnostics until message sending is complete.");
+                        break;
+                    }
                     System.out.println(messager.getDiagnostics());
                     break;
                 case "exit-overlay":
+                    if(messager.isInProgress()){
+                        System.out.println("The overlay has been constructed. This messaging node cannot exit the overlay until all tasks are finished.");
+                        break;
+                    }
                     messager.exitOverlay();
                     done = true;
+                    break;
+                case "print-routing-table":
+                    if(!messager.isInProgress() && !messager.isFinished()){
+                        System.out.println("Cannot print routing table until setup-overlay is complete.");
+                        break;
+                    }
+                    System.out.print(messager.printRoutingTable());
                     break;
                 default:
                     System.out.println("Improperly formatted command. Please try again. Ex:print-counters-and-diagnostics");

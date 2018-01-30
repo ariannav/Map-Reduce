@@ -179,7 +179,7 @@ public class Registry implements Comparator<NodeContainer>{
             ArrayList<NodeContainer> overlay = new ArrayList<>(numEntries);
             for(int nodesAway = 1; nodesAway < Math.pow(2, numEntries); nodesAway *= 2){
                 int index = (i + nodesAway) % nodes.size();
-                if(index == i){ index++; }
+                if(index == i){ index++; index %= nodes.size(); }
                 overlay.add(nodes.get(index));
             }
 
