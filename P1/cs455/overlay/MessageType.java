@@ -164,23 +164,23 @@ public class MessageType {
 
     }
 
-    /*
-    private void processType6(DataInputStream message){  //TODO: REGISTRY_SENDS_NODE_MANIFEST
-        try{
-            //Get IP length and read IP into variable ip.
-            int ipLength = message.read();
-            ip = new char[ipLength];
-            message.read(ip);
 
-            //Get port number
-            port = message.read();
-        }
-        catch(IOException e){
-            System.out.println("Incorrect message format. Message type 2.");
-        }
+    public void processType6() throws IOException{  //TODO: REGISTRY_SENDS_NODE_MANIFEST
+        //Get entire message
+        int  dataLength = incoming.readInt();
+        byte[] data = new byte[dataLength];
+        incoming.readFully(data, 0, dataLength);
+
+        //Process
+        lastType = data[0];
+        nodeID = (data[1]  << 8) | (data[2] & 0xFF);
+
+        //Get Info String length and Info String
+        byte infoStringLength = data[3];
+        infoString = Arrays.copyOfRange(data, 4, 4 + infoStringLength);
     }
 
-
+    /*
     private void processType8(DataInputStream message){  //TODO: REGISTRY_REQUESTS_TASK_INITIATE
         try{
             //Get IP length and read IP into variable ip.

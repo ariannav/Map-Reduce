@@ -43,6 +43,7 @@ public class Registry implements Comparator<NodeContainer>{
             sockit = createServerSocket();
             nodes = new ArrayList<>();
             randomGenerator = new Random();
+            registries = new ArrayList<>();
         }
         catch(IOException e){
             System.out.println("Error encountered creating socket." + e + "\n");
@@ -185,7 +186,6 @@ public class Registry implements Comparator<NodeContainer>{
             nodes.get(i).setOverlay(overlay);
         }
 
-        //Sending messages to nodes
         for(int j = 0; j < registries.size(); j++){
             registries.get(j).setupOverlay();
         }
@@ -207,6 +207,15 @@ public class Registry implements Comparator<NodeContainer>{
                           +  nodes.get(i).getRoutingTableString() + "\n\n";
         }
         return routingTables;
+    }
+
+
+    public int[] getNodeIDs(){
+        int[] nodeIDs = new int[nodes.size()];
+        for(int i = 0; i < nodes.size(); i++){
+            nodeIDs[i] = nodes.get(i).getNodeID();
+        }
+        return nodeIDs;
     }
 
 

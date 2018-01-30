@@ -1,6 +1,7 @@
 package cs455.overlay;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MessageCreator {
@@ -137,8 +138,33 @@ public class MessageCreator {
         return message;
     }
 
-    public byte[] createMessageType6(){
-        return new byte[0];
+    public byte[] createMessageType6(ArrayList<NodeContainer> overlay, int[] nodeIDs){
+        ArrayList<Byte> message = new ArrayList<>();
+        message.add((byte)6);               //Type
+        message.add((byte)overlay.size());  //Routing table size
+
+        for(int i = 0; i < overlay.size(); i++){
+            message.add((byte)(overlay.get(i).getNodeID() >> 8));
+            message.add((byte)overlay.get(i).getNodeID());              //Adding node ID
+            message.add((byte)overlay.get(i).getIPAddress().length);    //Adding IP address length
+            for(int j = 0; j < overlay.get(i).getIPAddress().length; j++){  //Adding IP address
+                message.add(overlay.get(i).getIPAddress()[j]);
+            }
+            message.add((byte)(overlay.get(i).getPort() >> 8));
+            message.add((byte)overlay.get(i).getPort());                //Adding port
+        }
+
+        message.add((byte)nodeIDs.length);                              //Number of nodeIDs
+        for(int k = 0; k < nodeIDs.length; k++){
+            message.add((byte)(nodeIDs[k] >> 8));                       //Adding each node ID
+            message.add((byte)nodeIDs[k]);
+        }
+
+        byte[] bm = new byte[message.size()];
+        for(int l = 0; l < message.size(); l++){
+            bm[l] = message.get(l).byteValue();
+        }
+        return bm;
     }
 
     public byte[] createMessageType7(){

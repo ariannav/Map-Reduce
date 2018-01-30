@@ -32,7 +32,7 @@ public class ForegroundThread implements Runnable{
                         registry.setupOverlay(numEntries);
                     }
                     catch(Exception e){
-                        System.out.println("Improperly formatted command. Please try again. Ex:setup-overlay 10");
+                        registry.setupOverlay(3);       //3 is the default value
                     }
                     break;
                 case "list-routing-tables":

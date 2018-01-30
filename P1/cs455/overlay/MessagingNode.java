@@ -20,22 +20,23 @@ public class MessagingNode{
             messager.sendMessage(2);
 
             //Receive Confirmation
-            MessageType process = new MessageType(messager.incoming);
-            process.processType3();
-            messager.nodeID = process.getNodeID();
+            messager.process.processType3();
+            messager.nodeID = messager.process.getNodeID();
 
             if(messager.nodeID == -1){
-                System.out.println("Registration unsuccessful. Reason: " + process.getInfoString() + " Exiting program.");
+                System.out.println("Registration unsuccessful. Reason: " + messager.process.getInfoString() + " Exiting program.");
                 messager.flushCloseExit();
             }
             else{
-                System.out.println(process.getInfoString() + " Assigned Node ID: " + process.getNodeID());
+                System.out.println(messager.process.getInfoString() + " Assigned Node ID: " + messager.process.getNodeID());
             }
 
-            //TODO: Add foreground thread, which should be able to call deregister
-            Thread server = new Thread(new MNServer(messager, messager.sockit));
+            Thread foreground = new Thread(new MessagingForegroundThread(messager));    //Taking commands
+            foreground.start();
+            Thread server = new Thread(new MNServer(messager, messager.sockit));        //Ready to accept connections.
             server.start();
 
+            messager.process.processType6(); //TODO
         }
         catch(Exception e){
             System.out.println("Error encountered in main: " + e);
@@ -50,6 +51,7 @@ public class MessagingNode{
     private DataInputStream incoming;
     private MessageCreator creator;
     private int nodeID;
+    private MessageType process;
 
 
     public MessagingNode(String registryHost, String registryPort){
@@ -79,9 +81,10 @@ public class MessagingNode{
             incoming = new DataInputStream(registrySockit.getInputStream());
         }
         catch(IOException e){
-            System.out.println("Cannot create messaging node. Could not connect to registry.");
+            System.out.println("Cannot create messaging node. Could not connect to registry. Please try again.");
+            flushCloseExit();
         }
-
+         process =  new MessageType(incoming);
          creator = new MessageCreator(this);
     }
 
@@ -170,7 +173,8 @@ public class MessagingNode{
 
 
     public void exitOverlay(){
-        //TODO
+        deregister(process);
+
     }
 
 

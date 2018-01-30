@@ -1,5 +1,6 @@
 package cs455.overlay;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -24,7 +25,12 @@ public class MNServer implements Runnable{
                 newThread.start();
             }
             catch(Exception e){
-                System.out.println("Problem accepting connection on registry server socket. " + e);
+                try{
+                    sockit.close();
+                }
+                catch(IOException ioe){
+                    System.out.println("Cannot close sockit. " + ioe);
+                }
             }
 
         }

@@ -53,18 +53,19 @@ public class RegistryNode implements Runnable{
                 int type = processor.getLastTypeReceived();
                 if(type == 4){
                     //Deregister
+                    System.out.println("Here!");
                     deregister();
                     sendMessage(5);     //Success!
                     flushCloseExit();
                 }
                 else if(type == 7){
-                    //Node reported overlay setup status
+                    //TODO: Node reported overlay setup status
                 }
                 else if(type == 10){
-                    //Overlay node reports task finished
+                    //TODO: Overlay node reports task finished
                 }
                 else if(type == 12){
-                    //Overlay node reports traffic summary.
+                    //TODO: Overlay node reports traffic summary.
                 }
 
             }
@@ -124,7 +125,7 @@ public class RegistryNode implements Runnable{
                 message = creator.createMessageType5(nodeID, unmatchedIP);
                 break;
             case 6:
-                message = creator.createMessageType6();
+                message = creator.createMessageType6(thisNode.getOverlay(), registry.getNodeIDs());
                 break;
             case 8:
                 message = creator.createMessageType8();
@@ -144,7 +145,13 @@ public class RegistryNode implements Runnable{
 
 
     public void setupOverlay(){
-        //TODO
+        try{
+            sendMessage(6);
+        }
+        catch(IOException e){
+            registry.deregisterNode(thisNode);
+            flushCloseExit();
+        }
     }
 
 
