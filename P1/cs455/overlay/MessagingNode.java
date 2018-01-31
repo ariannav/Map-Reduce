@@ -8,6 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 public class MessagingNode{
 
@@ -55,7 +56,6 @@ public class MessagingNode{
     private MessageType process;
     private boolean inProgress;
     private boolean isFinished;
-    private ArrayList<MNEndpoint> mnEndpoints;
 
 
     public MessagingNode(String registryHost, String registryPort){
@@ -170,10 +170,10 @@ public class MessagingNode{
                     inProgress = true;
                     initiateConnections();
                     sendMessage(7);
-                    //TODO: Wait for messaging request 
                 }
                 else if(type == 8){
                     //TODO: Registry requests task initiative
+                    startSendingMessages();
                     //TODO: Set isFinished = true and inProgress = false when done.
                 }
                 else if(type == 11){
@@ -190,9 +190,9 @@ public class MessagingNode{
     }
 
     public String printRoutingTable(){
-        String routingTable = "NodeID: " + nodeID + "\nDistance\t| NodeID \n";
+        String routingTable = "NodeID: " + nodeID + "\nDistance | NodeID \n";
         for(int i = 0; i < process.getOverlay().length; i++){
-            routingTable += Math.pow(2, i) + "\t| " +  process.getOverlay()[i].getNodeID() + "\n";
+            routingTable += Math.pow(2, i) + "\t\t| " +  process.getOverlay()[i].getNodeID() + "\n";
         }
         routingTable += "Size: " + process.getOverlay().length + "\n\n";
         return routingTable;
@@ -224,13 +224,32 @@ public class MessagingNode{
     }
 
 
-    public void endpointIsReady(MNEndpoint mne, int nodeID){
+    public synchronized void endpointIsReady(MNEndpoint mne, int nodeID){
         for(int i = 0; i < process.getOverlay().length; i++){
             if(nodeID == process.getOverlay()[i].getNodeID()){
                 process.getOverlay()[i].setEndpoint(mne);
                 break;
             }
         }
+    }
+
+
+    private void startSendingMessages(){
+        Random randomGenerator  = new Random();
+        int nextID;
+        for(int i = 0; i < process.getNumMessages(); i++){
+            nextID = randomGenerator.nextInt(process.getNodeIDs().length);
+            while(nextID == nodeID){
+                nextID = randomGenerator.nextInt(process.getNodeIDs().length);
+            }
+
+            sendTo(nextID);
+        }
+    }
+
+
+    private void sendTo(int nextID){
+
     }
 
 

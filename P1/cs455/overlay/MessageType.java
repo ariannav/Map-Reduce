@@ -3,6 +3,7 @@ package cs455.overlay;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -16,6 +17,7 @@ public class MessageType {
     private DataInputStream incoming;
     private NodeContainer[] overlay;
     private int[] nodeIDs;
+    private int numMessages;
 
     public MessageType(DataInputStream incoming){
             this.incoming = incoming;
@@ -31,16 +33,18 @@ public class MessageType {
         incoming.readFully(data, 0, dataLength);
 
         //Process
-        lastType = data[0];
+        ByteBuffer message = ByteBuffer.wrap(data);
+        lastType = message.get();
         if(lastType != 2){
             throw new IOException("Incorrect message type received: " + lastType);
         }
 
-        byte ipLength = data[1];
-        ip = Arrays.copyOfRange(data, 2, 2 + ipLength);
+        byte ipLength = message.get();
+        ip = new byte[ipLength];
+        message.get(ip, 0, ipLength);
 
         //Get port number
-        port = (data[2+ipLength] << 8) | (data[3+ipLength] & 0xFF);
+        port = message.getInt();
     }
 
 
@@ -71,28 +75,36 @@ public class MessageType {
     }
 
 
-    public void processType4(byte[] data) throws IOException{  //OVERLAY_NODE_SENDS_DEREGISTRATION
-        if(lastType != 4){
-            throw new IOException("Incorrect message type received: " + lastType);
-        }
+    public void processType4(byte[] data){  //OVERLAY_NODE_SENDS_DEREGISTRATION
+        ByteBuffer message = ByteBuffer.wrap(data);
+        lastType = message.get();
+        byte length = message.get();
 
-        byte ipLength = data[1];
-        ip = Arrays.copyOfRange(data, 2, 2 + ipLength);
+        //Put IP in array
+        ip = new byte[length];
+        message.get(ip, 0, length);
 
-        //Get port number
-        port = (data[2+ipLength] << 8) | (data[3+ipLength] & 0xFF);
+        //Port number
+        port = message.getInt();
+
+        //Port NodeID
+        nodeID = message.getInt();
+
     }
 
 
     private void processType7(byte[] data) throws IOException{  //NODE_REPORTS_OVERLAY_SETUP_STATUS
+        ByteBuffer message = ByteBuffer.wrap(data);
         //Get node ID
-        nodeID = (data[1]<<8) | (data[2] & 0xFF);
+        lastType = message.get();
+        nodeID = message.getInt();
 
-        byte length = data[3];
-        infoString = Arrays.copyOfRange(data, 4, 4 + length);
+        byte length = message.get();
+        infoString = new byte[length];
+        message.get(infoString, 0, length);
 
         if(nodeID == -1 ) {
-            throw new IOException("Node was unable to setup overlay. " + infoString);
+            throw new IOException("Node was unable to setup overlay. " + getInfoString());
         }
     }
 
@@ -138,12 +150,14 @@ public class MessageType {
         incoming.readFully(data, 0, dataLength);
 
         //Process
-        lastType = data[0];
-        nodeID = (data[1]  << 8) | (data[2] & 0xFF);
+        ByteBuffer message = ByteBuffer.wrap(data);
+        lastType = message.get();
+        nodeID = message.getInt();
 
         //Get Info String length and Info String
-        byte infoStringLength = data[3];
-        infoString = Arrays.copyOfRange(data, 4, 4 + infoStringLength);
+        byte infoStringLength = message.get();
+        infoString = new byte[infoStringLength];
+        message.get(infoString, 0, infoStringLength);
 
         if(nodeID == -1){
             throw new IOException("Message Node was not successfully registered. NodeID -1. " + getInfoString());
@@ -167,7 +181,7 @@ public class MessageType {
                 processType6(data);
                 break;
             case 8:
-                //processType8(data);
+                processType8(data);
                 break;
             case 11:
                 //processType11(data);
@@ -179,52 +193,46 @@ public class MessageType {
 
 
     public void processType5(byte[] data){  //REGISTRY_REPORTS_DEREGISTRATION_STATUS
-
-        nodeID = (data[1]  << 8) | (data[2] & 0xFF);
+        ByteBuffer message = ByteBuffer.wrap(data);
+        lastType = message.get();
+        nodeID = message.getInt();
 
         //Get Info String length and Info String
-        byte infoStringLength = data[3];
-        infoString = Arrays.copyOfRange(data, 4, 4 + infoStringLength);
-
+        byte infoStringLength = message.get();
+        infoString = new byte[infoStringLength];
+        message.get(infoString, 0, infoStringLength);
     }
 
 
     public void processType6(byte[] data){ //REGISTRY_SENDS_NODE_MANIFEST
-        byte routingTableSize = data[1];
+        ByteBuffer message = ByteBuffer.wrap(data);
+        lastType = message.get();
+        byte routingTableSize = message.get();
         overlay = new NodeContainer[routingTableSize];
-        int i = 2;
         for(int j = 0; j < routingTableSize; j++){
-            int nodeID = (data[i] << 8) | (data[i+1] & 0xFF); i++; i++;
-            byte ipLength = data[i]; i++;
-            byte[] nodeIP = Arrays.copyOfRange(data, i, i + ipLength); i += ipLength;
-            int port = (data[i] << 8) | (data[i+1] & 0xFF); i++; i++;
+            int nodeID = message.getInt();
+            byte ipLength = message.get();
+            byte[] nodeIP = new byte[ipLength];
+            message.get(nodeIP, 0, ipLength);
+            int port = message.getInt();
             NodeContainer node = new NodeContainer(nodeID, nodeIP, port, "");
             overlay[j] = node;
         }
-        byte numNodes = data[i]; i++;
+        byte numNodes = message.get();
         nodeIDs = new int[numNodes];
         for(int j = 0; j < numNodes; j++){
-            nodeIDs[j] = (data[i] << 8) | (data[i+1] & 0xFF); i += 2;
+            nodeIDs[j] = message.getInt();
         }
+    }
+
+
+    public void processType8(byte[] data){  //REGISTRY_REQUESTS_TASK_INITIATE
+        ByteBuffer message = ByteBuffer.wrap(data);
+        lastType = message.get();
+        numMessages = message.getInt();
     }
 
     /*
-    private void processType8(DataInputStream message){  //TODO: REGISTRY_REQUESTS_TASK_INITIATE
-        try{
-            //Get IP length and read IP into variable ip.
-            int ipLength = message.read();
-            ip = new char[ipLength];
-            message.read(ip);
-
-            //Get port number
-            port = message.read();
-        }
-        catch(IOException e){
-            System.out.println("Incorrect message format. Message type 2.");
-        }
-    }
-
-
     private void processType11(DataInputStream message){  //TODO: REGISTRY_REQUESTS_TRAFFIC_SUMMARY
         try{
             //Get IP length and read IP into variable ip.
@@ -303,5 +311,10 @@ public class MessageType {
 
     public int[] getNodeIDs() {
         return nodeIDs;
+    }
+
+
+    public int getNumMessages(){
+        return numMessages;
     }
 }

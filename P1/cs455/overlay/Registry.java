@@ -35,6 +35,7 @@ public class Registry implements Comparator<NodeContainer>{
     private ArrayList<NodeContainer> nodes;
     private Random randomGenerator;
     private ArrayList<RegistryNode> registries;
+    private int ready;
 
 
     //Registry Constructor
@@ -44,6 +45,7 @@ public class Registry implements Comparator<NodeContainer>{
             nodes = new ArrayList<>();
             randomGenerator = new Random();
             registries = new ArrayList<>();
+            ready = 0;
         }
         catch(IOException e){
             System.out.println("Error encountered creating socket." + e + "\n");
@@ -118,7 +120,7 @@ public class Registry implements Comparator<NodeContainer>{
 
     public NodeContainer registerNode(byte[] ip, int port, String hostname, RegistryNode registry){
         //If node previously registered, return -1. (IP is already listed in node list, and port is the same)
-        int nodeID = randomGenerator.nextInt(127);
+        int nodeID = randomGenerator.nextInt(128);
         for(int i = 0; i < nodes.size(); i++){
             if(Arrays.equals(nodes.get(i).getIPAddress(), ip) && nodes.get(i).getPort() == port){
                 return new NodeContainer(-1, ip, port, hostname);
@@ -129,7 +131,7 @@ public class Registry implements Comparator<NodeContainer>{
         }
 
         while(nodeID == -1){
-            nodeID = randomGenerator.nextInt(127);
+            nodeID = randomGenerator.nextInt(128);
             for(int i = 0; i < nodes.size(); i++){
                 if(nodeID == nodes.get(i).getNodeID()){
                     nodeID = -1;
@@ -219,11 +221,16 @@ public class Registry implements Comparator<NodeContainer>{
     }
 
 
-    public void startSendingMessages(int numMessages){
-        //TODO
-        return;
+    public synchronized void incrementReady(){
+        ready++;
     }
 
+
+    public void startSendingMessages(int numMessages){
+        for(int j = 0; j < registries.size(); j++){
+            registries.get(j).tellMessagerToSend(numMessages);
+        }
+    }
 }
 
 

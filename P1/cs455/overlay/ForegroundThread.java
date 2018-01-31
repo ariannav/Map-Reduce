@@ -46,7 +46,12 @@ public class ForegroundThread implements Runnable{
                 case "start":
                     try{
                         int numMessages = Integer.parseInt(word[1]);
-                        registry.startSendingMessages(numMessages);
+                        if(overlaySetup){
+                            registry.startSendingMessages(numMessages);
+                        }
+                        else{
+                            System.out.println("Cannot send messages until the overlay is constructed. Please setup-overlay first.");
+                        }
                     }
                     catch(Exception e){
                         System.out.println("Improperly formatted command. Please try again. Ex:start 100");

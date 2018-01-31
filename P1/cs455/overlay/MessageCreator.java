@@ -1,6 +1,7 @@
 package cs455.overlay;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class MessageCreator {
@@ -12,33 +13,25 @@ public class MessageCreator {
         this.messager = messager;
     }
 
+
     public MessageCreator(RegistryNode registry){
         this.registry = registry;
     }
 
-    public byte[] createMessageType2(){
+
+    public byte[] createMessageType2(){     //OVERLAY NODE SENDS REGISTRATION
         //Type and IP length
-        byte type = 2;
-        byte length = (byte) messager.getIPAddress().length;
+        ByteBuffer message = ByteBuffer.allocate(6 + messager.getIPAddress().length);
+        message.put((byte)2);
+        message.put((byte)messager.getIPAddress().length);
+        message.put(messager.getIPAddress());
+        message.putInt(messager.getPortNumber());
 
-        int arrayLength = 1 + 1 + length + 2;
-        byte[] message = new byte[arrayLength];
-        message[0] = type;
-        message[1] = length;
-
-        //Put IP in array
-        for(int i = 2; i < length+2; i++){
-            message[i] = messager.getIPAddress()[i-2];
-        }
-
-        //Port number
-        message[2 + length] = (byte) (messager.getPortNumber() >> 8);
-        message[3 + length] = (byte) (messager.getPortNumber());
-
-        return message;
+        return message.array();
     }
 
-    public byte[] createMessageType3(int nodeID, boolean unmatchedIP){
+
+    public byte[] createMessageType3(int nodeID, boolean unmatchedIP){      //REGISTRY REPORTS REGISTRATION STATUS
         String infoString;
         if(nodeID == -1){
             if(unmatchedIP){
@@ -62,44 +55,34 @@ public class MessageCreator {
         }
 
         //Create message
-        byte[] message = new byte[4 + bMessage.length];
-        message[0] = 3; //Type
-        message[1] = (byte)(nodeID>>8);
-        message[2] = (byte)(nodeID);
-        message[3] = (byte) bMessage.length;
+        ByteBuffer message = ByteBuffer.allocate(6 + bMessage.length);
+        message.put((byte) 3);   //Type
+        message.putInt(nodeID);
+        message.put((byte)bMessage.length);
+        message.put(bMessage);
 
-        //Put bMessage in array
-        for(int i = 4; i < bMessage.length+4; i++){
-            message[i] = bMessage[i-4];
-        }
-
-        return message;
+        return message.array();
     }
 
-    public byte[] createMessageType4(){
-        byte length = (byte) messager.getIPAddress().length;
-        byte[] message = new byte[6 + length];
-        message[0] = 4;
-        message[1] = length;
+
+    public byte[] createMessageType4(){         //OVERLAY NODE SENDS DEREGISTRATION
+        ByteBuffer message = ByteBuffer.allocate(10 + messager.getIPAddress().length);
+        message.put((byte)4);
+        message.put((byte)messager.getIPAddress().length);
 
         //Put IP in array
-        for(int i = 2; i < length+2; i++){
-            message[i] = messager.getIPAddress()[i-2];
-        }
+        message.put(messager.getIPAddress());
 
         //Port number
-        message[2 + length] = (byte) (messager.getPortNumber() >> 8);
-        message[3 + length] = (byte) (messager.getPortNumber());
+        message.putInt(messager.getPortNumber());
 
-        //Port number
-        message[4 + length] = (byte) (messager.getNodeID() >> 8);
-        message[5 + length] = (byte) (messager.getNodeID());
-
-        return message;
+        //Port NodeID
+        message.putInt(messager.getNodeID());
+        return message.array();
     }
 
 
-    public byte[] createMessageType5(int nodeID, boolean unmatchedIP){
+    public byte[] createMessageType5(int nodeID, boolean unmatchedIP){      //REGISTRY_REPORTS_DEREGISTRATION_STATUS
         String infoString;
         if(nodeID == -1){
             if(unmatchedIP){
@@ -123,48 +106,41 @@ public class MessageCreator {
         }
 
         //Create message
-        byte[] message = new byte[4 + bMessage.length];
-        message[0] = 5; //Type
-        message[1] = (byte)(nodeID>>8);
-        message[2] = (byte)(nodeID);
-        message[3] = (byte) bMessage.length;
+        ByteBuffer message = ByteBuffer.allocate(6 + bMessage.length);
+        message.put((byte) 5);   //Type
+        message.putInt(nodeID);
+        message.put((byte)bMessage.length);
+        message.put(bMessage);
 
-        //Put bMessage in array
-        for(int i = 4; i < bMessage.length+4; i++){
-            message[i] = bMessage[i-4];
-        }
-
-        return message;
+        return message.array();
     }
+
 
     public byte[] createMessageType6(ArrayList<NodeContainer> overlay, int[] nodeIDs){
-        ArrayList<Byte> message = new ArrayList<>();
-        message.add((byte)6);               //Type
-        message.add((byte)overlay.size());  //Routing table size
+        int routerByteSize = 0;
+        for(int i = 0; i < overlay.size(); i++){
+            routerByteSize += 9 + overlay.get(i).getIPAddress().length;
+        }
+
+        ByteBuffer message = ByteBuffer.allocate(3 + routerByteSize + (4*nodeIDs.length));
+        message.put((byte)6);               //Type
+        message.put((byte)overlay.size());  //Routing table size
 
         for(int i = 0; i < overlay.size(); i++){
-            message.add((byte)(overlay.get(i).getNodeID() >> 8));
-            message.add((byte)overlay.get(i).getNodeID());              //Adding node ID
-            message.add((byte)overlay.get(i).getIPAddress().length);    //Adding IP address length
-            for(int j = 0; j < overlay.get(i).getIPAddress().length; j++){  //Adding IP address
-                message.add(overlay.get(i).getIPAddress()[j]);
-            }
-            message.add((byte)(overlay.get(i).getPort() >> 8));
-            message.add((byte)overlay.get(i).getPort());                //Adding port
+            message.putInt(overlay.get(i).getNodeID());              //Adding node ID
+            message.put((byte)overlay.get(i).getIPAddress().length);    //Adding IP address length
+            message.put(overlay.get(i).getIPAddress());
+            message.putInt(overlay.get(i).getPort());                //Adding port
         }
 
-        message.add((byte)nodeIDs.length);                              //Number of nodeIDs
-        for(int k = 0; k < nodeIDs.length; k++){
-            message.add((byte)(nodeIDs[k] >> 8));                       //Adding each node ID
-            message.add((byte)nodeIDs[k]);
+        message.put((byte)nodeIDs.length);                              //Number of nodeIDs
+        for(int i = 0; i < nodeIDs.length; i++){
+            message.putInt(nodeIDs[i]);
         }
 
-        byte[] bm = new byte[message.size()];
-        for(int l = 0; l < message.size(); l++){
-            bm[l] = message.get(l).byteValue();
-        }
-        return bm;
+        return message.array();
     }
+
 
     public byte[] createMessageType7(){
         String infoString = "Overlay setup success.";
@@ -179,23 +155,25 @@ public class MessageCreator {
         }
 
         //Create message
-        byte[] message = new byte[4 + bMessage.length];
-        message[0] = 7; //Type
-        message[1] = (byte)(messager.getNodeID()>>8);
-        message[2] = (byte)(messager.getNodeID());
-        message[3] = (byte) bMessage.length;
+        ByteBuffer message = ByteBuffer.allocate(6+bMessage.length);
+        message.put((byte)7);
+        message.putInt(messager.getNodeID());
+        message.put((byte)bMessage.length);
 
         //Put bMessage in array
-        for(int i = 4; i < bMessage.length+4; i++){
-            message[i] = bMessage[i-4];
-        }
+        message.put(bMessage);
 
-        return message;
+        return message.array();
     }
 
-    public byte[] createMessageType8(){
-        return new byte[0];
+
+    public byte[] createMessageType8(int numMessages){
+        ByteBuffer message = ByteBuffer.allocate(5);
+        message.put((byte)8);
+        message.putInt(numMessages);
+        return message.array();
     }
+
 
     public byte[] createMessageType9(){
         return new byte[0];

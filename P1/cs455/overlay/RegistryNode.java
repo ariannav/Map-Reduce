@@ -17,6 +17,7 @@ public class RegistryNode implements Runnable{
     private NodeContainer thisNode;
     private boolean unmatchedIP;
     private Registry registry;
+    private int numMessages;
 
     public RegistryNode(Socket sockit, Registry registry){
         this.sockit = sockit;
@@ -58,7 +59,7 @@ public class RegistryNode implements Runnable{
                     throw new IOException("interrupt");
                 }
                 else if(type == 7){
-                    //TODO: Node reported overlay setup status, add to list of ready nodes.
+                    registry.incrementReady();  //Number of nodes ready increases, now we let the registry send the setup-overlay message.
                 }
                 else if(type == 10){
                     //TODO: Overlay node reports task finished
@@ -69,11 +70,11 @@ public class RegistryNode implements Runnable{
 
             }
             catch(IOException e){
-                if(e.toString().equals("interrupt")){
-                    Thread.currentThread().interrupt();
+                if(e.toString().equals("java.io.IOException: interrupt")){
+                    break;
                 }
                 else{
-                    System.out.println(e);
+                    System.out.println(e );
                     flushCloseExit();
                 }
             }
@@ -110,12 +111,12 @@ public class RegistryNode implements Runnable{
             nodeID = -1;
             unmatchedIP = true;
             sendMessage(5);
-            flushCloseExit();
+            throw new IOException("interrupt");
         }
         else if(registry.deregisterNode(thisNode) == 0){
             //Deregister failed, thisNode.getID() should return -1 now.
             sendMessage(5);
-            flushCloseExit();
+            throw new IOException("interrupt");
         }
     }
 
@@ -132,7 +133,7 @@ public class RegistryNode implements Runnable{
                 message = creator.createMessageType6(thisNode.getOverlay(), registry.getNodeIDs());
                 break;
             case 8:
-                message = creator.createMessageType8();
+                message = creator.createMessageType8(numMessages);
                 break;
             case 11:
                 message = creator.createMessageType11();
@@ -151,6 +152,18 @@ public class RegistryNode implements Runnable{
     public void setupOverlay(){
         try{
             sendMessage(6);
+        }
+        catch(IOException e){
+            registry.deregisterNode(thisNode);
+            flushCloseExit();
+        }
+    }
+
+
+    public void tellMessagerToSend(int numMessages){
+        try{
+            this.numMessages = numMessages;
+            sendMessage(8);
         }
         catch(IOException e){
             registry.deregisterNode(thisNode);
