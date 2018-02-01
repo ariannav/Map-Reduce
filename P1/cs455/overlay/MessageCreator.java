@@ -175,8 +175,17 @@ public class MessageCreator {
     }
 
 
-    public byte[] createMessageType9(){
-        return new byte[0];
+    public byte[] createMessageType9(int destNodeID, int payload, int[] trace){
+        ByteBuffer message = ByteBuffer.allocate(17 + (4*trace.length));
+        message.put((byte)9);
+        message.putInt(destNodeID);
+        message.putInt(messager.getNodeID());
+        message.putInt(payload);
+        message.putInt(trace.length);
+        for(int i = 0; i < trace.length; i++){
+            message.putInt(trace[i]);
+        }
+        return message.array();
     }
 
     public byte[] createMessageType10(){

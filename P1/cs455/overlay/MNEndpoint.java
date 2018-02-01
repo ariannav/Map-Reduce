@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Random;
 
 public class MNEndpoint implements Runnable{
 
@@ -13,8 +14,8 @@ public class MNEndpoint implements Runnable{
     private Socket sockit;
     private DataOutputStream outgoing;
     private DataInputStream incoming;
-    private MessageType process;
     private MessageCreator creator;
+    private Random randomGenerator;
 
     public MNEndpoint(MessagingNode messager, NodeContainer neighbor){
         this.messager = messager;
@@ -29,14 +30,26 @@ public class MNEndpoint implements Runnable{
             System.out.println("Cannot create messaging node. Could not connect to registry. Please try again.");
             flushCloseExit();
         }
-        process =  new MessageType(incoming);
         creator = new MessageCreator(messager);
+        randomGenerator = new Random();
     }
 
 
     @Override
     public void run() {
         messager.endpointIsReady(this, neighbor.getNodeID());
+    }
+
+
+    public void sendTo(int destNodeID) throws IOException{
+        int[] trace = {messager.getNodeID()};
+        int payload = randomGenerator.nextInt();
+        byte[] message = creator.createMessageType9(destNodeID, payload, trace);
+
+        outgoing.write(message, 0, message.length);
+        outgoing.flush();
+        messager.addPacketSent();
+        messager.addPayload(payload);
     }
 
 

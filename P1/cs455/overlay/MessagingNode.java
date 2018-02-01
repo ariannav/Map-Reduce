@@ -56,6 +56,7 @@ public class MessagingNode{
     private MessageType process;
     private boolean inProgress;
     private boolean isFinished;
+    private Statistics stats;
 
 
     public MessagingNode(String registryHost, String registryPort){
@@ -92,6 +93,7 @@ public class MessagingNode{
          creator = new MessageCreator(this);
          inProgress = false;
          isFinished = false;
+         stats = new Statistics();
     }
 
 
@@ -121,9 +123,6 @@ public class MessagingNode{
                 break;
             case 7:
                 message = creator.createMessageType7();
-                break;
-            case 9:
-                message = creator.createMessageType9();
                 break;
             case 10:
                 message = creator.createMessageType10();
@@ -172,9 +171,10 @@ public class MessagingNode{
                     sendMessage(7);
                 }
                 else if(type == 8){
-                    //TODO: Registry requests task initiative
                     startSendingMessages();
-                    //TODO: Set isFinished = true and inProgress = false when done.
+                    isFinished = true;
+                    inProgress = false;
+                    //TODO tell registry I am done.
                 }
                 else if(type == 11){
                     //TODO: Registry requests traffic summary.
@@ -234,7 +234,7 @@ public class MessagingNode{
     }
 
 
-    private void startSendingMessages(){
+    private void startSendingMessages() throws IOException{
         Random randomGenerator  = new Random();
         int nextID;
         for(int i = 0; i < process.getNumMessages(); i++){
@@ -248,8 +248,28 @@ public class MessagingNode{
     }
 
 
-    private void sendTo(int nextID){
+    private void sendTo(int nextID) throws IOException{
+        int closest = -1;
+        int index = -1;
+        for(int i = 0; i < process.getOverlay().length; i++){
+            int currNodeID = process.getOverlay()[i].getNodeID();
+            if(currNodeID < nextID && currNodeID > closest){
+                closest = currNodeID;
+                index = i;
+            }
+        }
 
+        if(closest == -1){
+            for(int i = 0; i < process.getOverlay().length; i++){
+                int currNodeID = process.getOverlay()[i].getNodeID();
+                if(currNodeID > closest){
+                    closest = currNodeID;
+                    index = i;
+                }
+            }
+        }
+
+        process.getOverlay()[index].getEndpoint().sendTo(nextID);
     }
 
 
@@ -290,5 +310,30 @@ public class MessagingNode{
     //Returns the assigned nodeID
     public int getNodeID(){
         return nodeID;
+    }
+
+
+    public synchronized void addPacketSent(){
+        stats.packetsSent++;
+    }
+
+
+    public synchronized void addPayload(int payload){
+        stats.sumValuesSent+= payload;
+    }
+
+
+    public synchronized void addPacketRecvd(){
+        stats.packetsRecvd++;
+    }
+
+
+    public synchronized void addPacketRelayed(){
+        stats.packetsRelayed++;
+    }
+
+
+    public synchronized void addSumValuesRecvd(int payload){
+        stats.sumValuesRecvd += payload;
     }
 }

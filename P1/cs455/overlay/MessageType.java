@@ -4,8 +4,6 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MessageType {
 
@@ -18,6 +16,10 @@ public class MessageType {
     private NodeContainer[] overlay;
     private int[] nodeIDs;
     private int numMessages;
+    private int payload;
+    private int sourceID;
+    private int destID;
+    private int[] trace;
 
     public MessageType(DataInputStream incoming){
             this.incoming = incoming;
@@ -251,22 +253,21 @@ public class MessageType {
 
     //=================================FROM MESSENGER TO MESSENGER======================================================
 
-    /*
-    private void processType9(DataInputStream message){  //TODO: OVERLAY_NODE_SENDS_DATA
-        try{
-            //Get IP length and read IP into variable ip.
-            int ipLength = message.read();
-            ip = new char[ipLength];
-            message.read(ip);
 
-            //Get port number
-            port = message.read();
-        }
-        catch(IOException e){
-            System.out.println("Incorrect message format. Message type 2.");
+
+
+    public void processType9() throws IOException{  //OVERLAY_NODE_SENDS_DATA
+        lastType = incoming.readByte();
+        destID = incoming.readInt();
+        sourceID = incoming.readInt();
+        payload = incoming.readInt();
+        int length = incoming.readInt();
+        trace = new int[length];
+        for(int i = 0; i < length; i++){
+            trace[i] = incoming.readInt();
         }
     }
-    */
+
 
     /*
     private byte[] ip;                          X

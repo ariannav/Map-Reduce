@@ -21,7 +21,7 @@ public class MNServer implements Runnable{
         while(true){
             try{
                 Socket routerSockit = sockit.accept();
-                Thread newThread = new Thread(new MNRouter(routerSockit));
+                Thread newThread = new Thread(new MNRouter(routerSockit, parent));
                 newThread.start();
             }
             catch(Exception e){
@@ -29,7 +29,7 @@ public class MNServer implements Runnable{
                     sockit.close();
                 }
                 catch(IOException ioe){
-                    System.out.println("Cannot close sockit. " + ioe);
+                    System.out.println("Cannot close sockit. " + ioe + " Received error: " + e);
                 }
             }
 
