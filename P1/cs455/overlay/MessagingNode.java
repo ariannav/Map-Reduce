@@ -174,7 +174,7 @@ public class MessagingNode{
                     startSendingMessages();
                     isFinished = true;
                     inProgress = false;
-                    //TODO tell registry I am done.
+                    sendMessage(10);
                 }
                 else if(type == 11){
                     //TODO: Registry requests traffic summary.
@@ -242,18 +242,21 @@ public class MessagingNode{
             while(nextID == nodeID){
                 nextID = randomGenerator.nextInt(process.getNodeIDs().length);
             }
-
-            sendTo(nextID);
+            int payload = randomGenerator.nextInt();
+            int[] trace = {nodeID};
+            sendTo(nodeID, nextID, payload, trace);
+            addPacketSent();
+            addPayload(payload);
         }
     }
 
 
-    private void sendTo(int nextID) throws IOException{
+    public void sendTo(int source, int dest, int payload, int[] trace) throws IOException{
         int closest = -1;
         int index = -1;
         for(int i = 0; i < process.getOverlay().length; i++){
             int currNodeID = process.getOverlay()[i].getNodeID();
-            if(currNodeID < nextID && currNodeID > closest){
+            if(currNodeID < dest && currNodeID > closest){
                 closest = currNodeID;
                 index = i;
             }
@@ -269,7 +272,7 @@ public class MessagingNode{
             }
         }
 
-        process.getOverlay()[index].getEndpoint().sendTo(nextID);
+        process.getOverlay()[index].getEndpoint().sendTo(source, dest, payload, trace);
     }
 
 

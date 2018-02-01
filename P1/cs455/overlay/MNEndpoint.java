@@ -5,7 +5,6 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Random;
 
 public class MNEndpoint implements Runnable{
 
@@ -15,7 +14,6 @@ public class MNEndpoint implements Runnable{
     private DataOutputStream outgoing;
     private DataInputStream incoming;
     private MessageCreator creator;
-    private Random randomGenerator;
 
     public MNEndpoint(MessagingNode messager, NodeContainer neighbor){
         this.messager = messager;
@@ -31,7 +29,6 @@ public class MNEndpoint implements Runnable{
             flushCloseExit();
         }
         creator = new MessageCreator(messager);
-        randomGenerator = new Random();
     }
 
 
@@ -41,15 +38,11 @@ public class MNEndpoint implements Runnable{
     }
 
 
-    public void sendTo(int destNodeID) throws IOException{
-        int[] trace = {messager.getNodeID()};
-        int payload = randomGenerator.nextInt();
-        byte[] message = creator.createMessageType9(destNodeID, payload, trace);
+    public void sendTo(int sourceID, int destNodeID, int payload, int[] trace) throws IOException{
+        byte[] message = creator.createMessageType9(sourceID, destNodeID, payload, trace);
 
         outgoing.write(message, 0, message.length);
         outgoing.flush();
-        messager.addPacketSent();
-        messager.addPayload(payload);
     }
 
 

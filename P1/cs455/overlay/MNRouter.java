@@ -1,42 +1,47 @@
 package cs455.overlay;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class MNRouter implements Runnable{
 
-    Socket sockit;
-    DataOutputStream outgoing;
-    DataInputStream incoming;
-    MessageType process;
-    MessageCreator creator;
+    private MessageType process;
+    private MessagingNode messager;
 
     public MNRouter(Socket sockit, MessagingNode messager) throws IOException{
 
-        this.sockit = sockit;
+        this.messager = messager;
         try{
-            outgoing = new DataOutputStream(sockit.getOutputStream());
-            incoming = new DataInputStream(sockit.getInputStream());
+            DataInputStream incoming = new DataInputStream(sockit.getInputStream());
+            process = new MessageType(incoming);
         }
         catch(IOException e){
             throw new IOException("Can't make input/output stream. ");
         }
-        process = new MessageType(incoming);
-        creator = new MessageCreator(messager);
     }
 
 
     @Override
     public void run(){
         try{
-            process.processType9();
-            //TODO Got a type 9, now need to process it and forward/keep. Update messenger variables when necessary.
+            while(true){
+                process.processType9();
+                if(process.getDestID() == messager.getNodeID()){
+                    messager.addPacketRecvd();
+                    messager.addSumValuesRecvd(process.getPayload());
+                }
+                else{
+                    int[] trace = Arrays.copyOf(process.getTrace(), process.getTrace().length + 1);
+                    trace[trace.length - 1] = messager.getNodeID();
+                    messager.sendTo(process.getSourceID(), process.getDestID(), process.getPayload(), trace);
+                    messager.addPacketRelayed();
+                }
+            }
         }
         catch(IOException e){
-            System.out.println("Could not read message from other messenger.");
-            System.exit(1);
+            //Socket was closed, that's okay :)
         }
     }
 }

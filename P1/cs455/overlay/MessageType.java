@@ -314,8 +314,24 @@ public class MessageType {
         return nodeIDs;
     }
 
-
     public int getNumMessages(){
         return numMessages;
     }
+
+    public int getPayload(){
+        return payload;
+    }
+
+    public int getSourceID(){
+        return sourceID;
+    }
+
+    public int getDestID(){
+        return destID;
+    }
+
+    public int[] getTrace(){
+        return trace;
+    }
 }
+
