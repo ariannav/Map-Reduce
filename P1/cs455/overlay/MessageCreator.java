@@ -1,3 +1,11 @@
+//Author: Arianna Vacca
+
+/*This class creates the different message types and
+returns a byte array to be sent. The message creator
+methods below are ordered 2-12. Either a RegistryNode
+or a MessagingNode can instantiate this class.
+ */
+
 package cs455.overlay;
 
 import java.io.IOException;
@@ -189,14 +197,29 @@ public class MessageCreator {
     }
 
     public byte[] createMessageType10(){
-        return new byte[0];
+        ByteBuffer message = ByteBuffer.allocate(10 + messager.getIPAddress().length);
+        message.put((byte) 10);
+        message.put((byte) messager.getIPAddress().length);
+        message.put(messager.getIPAddress());
+        message.putInt(messager.getPortNumber());
+        message.putInt(messager.getNodeID());
+        return message.array();
     }
 
     public byte[] createMessageType11(){
-        return new byte[0];
+        byte[] message = {(byte)11};
+        return message;
     }
 
     public byte[] createMessageType12(){
-        return new byte[0];
+        ByteBuffer message = ByteBuffer.allocate(33);
+        message.put((byte)12);
+        message.putInt(messager.getNodeID());
+        message.putInt(messager.getPacketsSent());
+        message.putInt(messager.getPacketsRelayed());
+        message.putLong(messager.getSentPayload());
+        message.putInt(messager.getPacketsRecvd());
+        message.putLong(messager.getRecvdPayload());
+        return message.array();
     }
 }

@@ -112,41 +112,7 @@ public class MessagingNode{
     }
 
 
-    private void sendMessage(int type){
-        byte[] message = new byte[0];
-        switch(type){
-            case 2:
-                message = creator.createMessageType2();
-                break;
-            case 4:
-                message = creator.createMessageType4();
-                break;
-            case 7:
-                message = creator.createMessageType7();
-                break;
-            case 10:
-                message = creator.createMessageType10();
-                break;
-            case 12:
-                message = creator.createMessageType12();
-                break;
-            default:
-                System.out.println("Wrong message type given to send message.");
-                flushCloseExit();
-        }
-
-        try{
-            outgoing.writeInt(message.length);
-            outgoing.write(message, 0, message.length);
-            outgoing.flush();
-        }
-        catch(IOException e){
-            System.out.println("Problem sending message." + e);
-        }
-
-    }
-
-
+    //Primary Control Center
     private void waitForMessage(){
         //Could be MT 5, 6, 8, or 11 responding.
         while(true){
@@ -177,7 +143,9 @@ public class MessagingNode{
                     sendMessage(10);
                 }
                 else if(type == 11){
-                    //TODO: Registry requests traffic summary.
+                    sendMessage(12);
+                    resetCounters();
+                    //Done! Congrats!
                 }
 
             }
@@ -187,31 +155,6 @@ public class MessagingNode{
                 flushCloseExit();
             }
         }
-    }
-
-    public String printRoutingTable(){
-        String routingTable = "NodeID: " + nodeID + "\nDistance | NodeID \n";
-        for(int i = 0; i < process.getOverlay().length; i++){
-            routingTable += Math.pow(2, i) + "\t\t| " +  process.getOverlay()[i].getNodeID() + "\n";
-        }
-        routingTable += "Size: " + process.getOverlay().length + "\n\n";
-        return routingTable;
-    }
-
-
-    public boolean isInProgress(){
-        return inProgress;
-    }
-
-
-    public boolean isFinished(){
-        return isFinished;
-    }
-
-
-    public String getDiagnostics(){
-        //TODO
-        return "Nothing written yet!";
     }
 
 
@@ -281,21 +224,102 @@ public class MessagingNode{
         sendMessage(4);
     }
 
+    //======================================Message Sending Center======================================================
+    private void sendMessage(int type){
+        byte[] message = new byte[0];
+        switch(type){
+            case 2:
+                message = creator.createMessageType2();
+                break;
+            case 4:
+                message = creator.createMessageType4();
+                break;
+            case 7:
+                message = creator.createMessageType7();
+                break;
+            case 10:
+                message = creator.createMessageType10();
+                break;
+            case 12:
+                message = creator.createMessageType12();
+                break;
+            default:
+                System.out.println("Wrong message type given to send message.");
+                flushCloseExit();
+        }
 
-    private void flushCloseExit(){
         try{
-            //Close the streams.
+            outgoing.write(message, 0, message.length);
             outgoing.flush();
-            outgoing.close();
-            incoming.close();
+        }
+        catch(IOException e){
+            System.out.println("Problem sending message." + e);
+        }
 
-            //Close the socket.
-            sockit.close();
+    }
+
+
+    //====================================Traffic Summary Information===================================================
+    public synchronized void addPacketSent(){
+        stats.packetsSent++;
+    }
+
+    public int getPacketsSent(){
+        return stats.packetsSent;
+    }
+
+    public synchronized void addPayload(int payload){
+        stats.sumValuesSent+= payload;
+    }
+
+    public long getSentPayload(){
+        return stats.sumValuesSent;
+    }
+
+    public synchronized void addPacketRecvd(){
+        stats.packetsRecvd++;
+    }
+
+    public int getPacketsRecvd(){
+        return stats.packetsRecvd;
+    }
+
+    public synchronized void addPacketRelayed(){
+        stats.packetsRelayed++;
+    }
+
+    public int getPacketsRelayed(){
+        return stats.packetsRelayed;
+    }
+
+    public synchronized void addSumValuesRecvd(int payload){
+        stats.sumValuesRecvd += payload;
+    }
+
+    public long getRecvdPayload(){
+        return stats.sumValuesRecvd;
+    }
+
+
+    private void resetCounters(){
+        stats = new Statistics();
+    }
+
+
+    //=========================================Helper Methods===========================================================
+    public String printRoutingTable(){
+        String routingTable = "NodeID: " + nodeID + "\nDistance | NodeID \n";
+        for(int i = 0; i < process.getOverlay().length; i++){
+            routingTable += Math.pow(2, i) + "\t\t| " +  process.getOverlay()[i].getNodeID() + "\n";
         }
-        catch (IOException e){
-            System.exit(-1);
-        }
-        System.exit(0);
+        routingTable += "Size: " + process.getOverlay().length + "\n\n";
+        return routingTable;
+    }
+
+
+    public String getDiagnostics(){
+        //TODO
+        return "Nothing written yet!";
     }
 
 
@@ -316,27 +340,29 @@ public class MessagingNode{
     }
 
 
-    public synchronized void addPacketSent(){
-        stats.packetsSent++;
+    public boolean isInProgress(){
+        return inProgress;
     }
 
 
-    public synchronized void addPayload(int payload){
-        stats.sumValuesSent+= payload;
+    public boolean isFinished(){
+        return isFinished;
     }
 
 
-    public synchronized void addPacketRecvd(){
-        stats.packetsRecvd++;
-    }
+    private void flushCloseExit(){
+        try{
+            //Close the streams.
+            outgoing.flush();
+            outgoing.close();
+            incoming.close();
 
-
-    public synchronized void addPacketRelayed(){
-        stats.packetsRelayed++;
-    }
-
-
-    public synchronized void addSumValuesRecvd(int payload){
-        stats.sumValuesRecvd += payload;
+            //Close the socket.
+            sockit.close();
+        }
+        catch (IOException e){
+            System.exit(-1);
+        }
+        System.exit(0);
     }
 }

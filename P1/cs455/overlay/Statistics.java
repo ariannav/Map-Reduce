@@ -7,6 +7,7 @@ public class Statistics {
     public int packetsRecvd;
     public int packetsRelayed;
     public long sumValuesRecvd;
+    public int nodeID;
 
 
     public Statistics(){
@@ -15,5 +16,14 @@ public class Statistics {
         packetsRecvd = 0;
         packetsRelayed = 0;
         sumValuesRecvd = 0;
+    }
+
+    public Statistics(int nodeID, int packetsSent, int packetsRelayed, long sumValuesSent, int packetsRecvd, long sumValuesRecvd){
+        this.nodeID = nodeID;
+        this.packetsSent = packetsSent;
+        this.packetsRelayed = packetsRelayed;
+        this.sumValuesSent = sumValuesSent;
+        this.packetsRecvd = packetsRecvd;
+        this.sumValuesRecvd = sumValuesRecvd;
     }
 }

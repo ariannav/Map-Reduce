@@ -25,6 +25,7 @@ public class RegistryNode implements Runnable{
         this.registry = registry;
     }
 
+
     public void run(){
         //Registration interchange.
         try{
@@ -53,7 +54,7 @@ public class RegistryNode implements Runnable{
                 processor.processVariableFromMessenger();
                 int type = processor.getLastTypeReceived();
                 if(type == 4){
-                    //Deregister
+                    //De-register
                     deregister();
                     sendMessage(5);     //Success!
                     throw new IOException("interrupt");
@@ -62,10 +63,13 @@ public class RegistryNode implements Runnable{
                     registry.incrementReady();  //Number of nodes ready increases, now we let the registry send the setup-overlay message.
                 }
                 else if(type == 10){
-                    //TODO: Overlay node reports task finished
+                    registry.incrementTaskComplete();
+                    System.out.println("Node is finished sending messages!"); 
                 }
                 else if(type == 12){
-                    //TODO: Overlay node reports traffic summary.
+                    Statistics nodeStats = new Statistics(nodeID, processor.getTotalPacketsSent(), processor.getTotalPacketsRelayed(),
+                            processor.getSumDataSent(), processor.getTotalPacketsRecvd(), processor.getSumDataRecvd());
+                    registry.submitStats(nodeStats);
                 }
 
             }
@@ -80,6 +84,7 @@ public class RegistryNode implements Runnable{
             }
         }
     }
+
 
     private void register() throws IOException{
         //Registration
@@ -103,6 +108,7 @@ public class RegistryNode implements Runnable{
         }
     }
 
+
     private void deregister() throws IOException{
         unmatchedIP = false;
         //See if the IP matches
@@ -118,34 +124,6 @@ public class RegistryNode implements Runnable{
             sendMessage(5);
             throw new IOException("interrupt");
         }
-    }
-
-    private void sendMessage(int type) throws IOException{
-        byte[] message = new byte[0];
-        switch(type){
-            case 3:
-                message = creator.createMessageType3(nodeID, unmatchedIP);
-                break;
-            case 5:
-                message = creator.createMessageType5(nodeID, unmatchedIP);
-                break;
-            case 6:
-                message = creator.createMessageType6(thisNode.getOverlay(), registry.getNodeIDs());
-                break;
-            case 8:
-                message = creator.createMessageType8(numMessages);
-                break;
-            case 11:
-                message = creator.createMessageType11();
-                break;
-            default:
-                System.out.println("Wrong message type given to send message.");
-                flushCloseExit();
-        }
-
-        outgoing.writeInt(message.length);
-        outgoing.write(message, 0, message.length);
-        outgoing.flush();
     }
 
 
@@ -172,9 +150,50 @@ public class RegistryNode implements Runnable{
     }
 
 
+    public void getTrafficSummary(){
+        try{
+            sendMessage(11);
+        }
+        catch(IOException e){
+            System.out.println("Cannot send traffic summary request! " + e);
+            flushCloseExit();
+        }
+    }
+
+
+    //==========================================Sending=================================================================
+    private void sendMessage(int type) throws IOException{
+        byte[] message = new byte[0];
+        switch(type){
+            case 3:
+                message = creator.createMessageType3(nodeID, unmatchedIP);
+                break;
+            case 5:
+                message = creator.createMessageType5(nodeID, unmatchedIP);
+                break;
+            case 6:
+                message = creator.createMessageType6(thisNode.getOverlay(), registry.getNodeIDs());
+                break;
+            case 8:
+                message = creator.createMessageType8(numMessages);
+                break;
+            case 11:
+                message = creator.createMessageType11();
+                break;
+            default:
+                System.out.println("Wrong message type given to send message.");
+                flushCloseExit();
+        }
+
+        outgoing.write(message, 0, message.length);
+        outgoing.flush();
+    }
+
+    //========================================Helper Methods============================================================
     public int getNumNodes(){
         return registry.getNumNodes();
     }
+
 
     private void flushCloseExit(){
         try{
