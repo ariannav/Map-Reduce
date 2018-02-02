@@ -64,7 +64,6 @@ public class RegistryNode implements Runnable{
                 }
                 else if(type == 10){
                     registry.incrementTaskComplete();
-                    System.out.println("Node is finished sending messages!"); 
                 }
                 else if(type == 12){
                     Statistics nodeStats = new Statistics(nodeID, processor.getTotalPacketsSent(), processor.getTotalPacketsRelayed(),

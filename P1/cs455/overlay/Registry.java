@@ -203,12 +203,13 @@ public class Registry implements Comparator<NodeContainer>{
         finished++;
         if(finished == nodes.size()){
             requestTrafficSummary();
+            allStatistics = new ArrayList<>(nodes.size());
         }
     }
 
     public synchronized void submitStats(Statistics nodeStats){
-        allStatistics = new ArrayList<>(nodes.size());
         allStatistics.add(nodeStats);
+        System.out.println("Stats that have submitted: " + allStatistics.size() + " Nodes: " + nodes.size());
         if(allStatistics.size() == nodes.size()){
             printStatistics();
         }
@@ -256,15 +257,15 @@ public class Registry implements Comparator<NodeContainer>{
         long totalPayloadSent = 0, totalPayloadRecieved = 0;
         for(int i = 0; i < allStatistics.size(); i++){
             Statistics thisNode = allStatistics.get(i);
-            System.out.println(thisNode.nodeID + "\t| " + thisNode.packetsSent + "\t| " + thisNode.packetsRecvd + "\t| " + thisNode.packetsRelayed
-                    + "\t| " + thisNode.sumValuesSent + "\t| " + thisNode.sumValuesRecvd);
+            System.out.println(thisNode.nodeID + "\t\t| " + thisNode.packetsSent + "\t\t\t| " + thisNode.packetsRecvd + "\t\t\t\t\t| " + thisNode.packetsRelayed
+                    + "\t\t\t\t| " + thisNode.sumValuesSent + "\t\t| " + thisNode.sumValuesRecvd);
             totalSent += thisNode.packetsSent;
             totalReceived += thisNode.packetsRecvd;
             totalRelayed += thisNode.packetsRelayed;
             totalPayloadSent += thisNode.sumValuesSent;
             totalPayloadRecieved += thisNode.sumValuesRecvd;
         }
-        System.out.println("TOTAL\t| " + totalSent + "\t| " + totalReceived + "\t| " + totalRelayed + "\t| " + totalPayloadSent + "\t| " + totalPayloadRecieved);
+        System.out.println("TOTAL\t| " + totalSent + "\t\t\t| " + totalReceived + "\t\t\t\t\t| " + totalRelayed + "\t\t\t\t| " + totalPayloadSent + "\t\t| " + totalPayloadRecieved);
     }
 
     //Closes the server socket.

@@ -28,6 +28,7 @@ public class MNRouter implements Runnable{
         try{
             while(true){
                 process.processType9();
+                System.out.println("Type 9: Dest: " + process.getDestID() + " Source: " + process.getSourceID() + " Current ID: " + messager.getNodeID());
                 if(process.getDestID() == messager.getNodeID()){
                     messager.addPacketRecvd();
                     messager.addSumValuesRecvd(process.getPayload());

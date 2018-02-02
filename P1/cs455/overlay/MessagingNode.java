@@ -143,13 +143,14 @@ public class MessagingNode{
                     sendMessage(10);
                 }
                 else if(type == 11){
+                    Thread.sleep(100);
                     sendMessage(12);
                     resetCounters();
                     //Done! Congrats!
                 }
 
             }
-            catch(IOException e){
+            catch(Exception e){
                 System.err.println(e);
                 System.exit(1);
                 flushCloseExit();
@@ -182,12 +183,12 @@ public class MessagingNode{
         int nextID;
         for(int i = 0; i < process.getNumMessages(); i++){
             nextID = randomGenerator.nextInt(process.getNodeIDs().length);
-            while(nextID == nodeID){
+            while(process.getNodeIDs()[nextID] == nodeID){
                 nextID = randomGenerator.nextInt(process.getNodeIDs().length);
             }
             int payload = randomGenerator.nextInt();
-            int[] trace = {nodeID};
-            sendTo(nodeID, nextID, payload, trace);
+            int[] trace = {};
+            sendTo(nodeID, process.getNodeIDs()[nextID], payload, trace);
             addPacketSent();
             addPayload(payload);
         }
@@ -199,9 +200,10 @@ public class MessagingNode{
         int index = -1;
         for(int i = 0; i < process.getOverlay().length; i++){
             int currNodeID = process.getOverlay()[i].getNodeID();
-            if(currNodeID < dest && currNodeID > closest){
+            if(currNodeID <= dest && currNodeID > closest){
                 closest = currNodeID;
                 index = i;
+                if(currNodeID == dest){ break; }
             }
         }
 
