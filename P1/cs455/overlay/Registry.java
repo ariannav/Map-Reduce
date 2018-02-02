@@ -13,7 +13,7 @@ public class Registry implements Comparator<NodeContainer>{
 
     public static void main(String[] argv){
         //Create registry, opens socket and finds port number.
-        Registry registry = new Registry();
+        Registry registry = new Registry(argv[0]);
         System.out.println("Registry is now listening at " + registry.getInetAddress() + " on port " + registry.getPortNumber() + ".");
 
         //Create foreground thread.
@@ -41,9 +41,9 @@ public class Registry implements Comparator<NodeContainer>{
 
 
     //Registry Constructor
-    public Registry(){
+    public Registry(String port){
         try{
-            sockit = createServerSocket();
+            sockit = createServerSocket(port);
             nodes = new ArrayList<>();
             randomGenerator = new Random();
             registries = new ArrayList<>();
@@ -57,17 +57,22 @@ public class Registry implements Comparator<NodeContainer>{
 
 
     //Opens the initial server socket and finds an acceptable port.
-    private ServerSocket createServerSocket() throws IOException{
-        for(int i = 2000; i < 10000; i++){
-            try{
-                ServerSocket temp = new ServerSocket(i);
-                return temp;
-            }
-            catch(Exception e){
-                continue;
-            }
+    private ServerSocket createServerSocket(String port) throws IOException{
+        try{
+            return new ServerSocket(Integer.parseInt(port));
         }
-        throw new IOException("No available ports.");
+        catch(Exception e){
+            for(int i = 2000; i < 10000; i++){
+                try{
+                    ServerSocket temp = new ServerSocket(i);
+                    return temp;
+                }
+                catch(Exception f){
+                    continue;
+                }
+            }
+            throw new IOException("No available ports.");
+        }
     }
 
 
@@ -209,7 +214,6 @@ public class Registry implements Comparator<NodeContainer>{
 
     public synchronized void submitStats(Statistics nodeStats){
         allStatistics.add(nodeStats);
-        System.out.println("Stats that have submitted: " + allStatistics.size() + " Nodes: " + nodes.size());
         if(allStatistics.size() == nodes.size()){
             printStatistics();
         }
@@ -252,7 +256,7 @@ public class Registry implements Comparator<NodeContainer>{
     }
 
     private void printStatistics(){
-        System.out.println("Node ID\t| Packets Sent\t| Packets Received\t| Packets Relayed\t| Sum Values Sent\t| Sum Values Received");
+        System.out.println("\nNode ID\t| Packets Sent\t| Packets Received\t| Packets Relayed\t| Sum Values Sent\t| Sum Values Received");
         int totalSent = 0, totalReceived = 0, totalRelayed = 0;
         long totalPayloadSent = 0, totalPayloadRecieved = 0;
         for(int i = 0; i < allStatistics.size(); i++){
@@ -265,7 +269,8 @@ public class Registry implements Comparator<NodeContainer>{
             totalPayloadSent += thisNode.sumValuesSent;
             totalPayloadRecieved += thisNode.sumValuesRecvd;
         }
-        System.out.println("TOTAL\t| " + totalSent + "\t\t\t| " + totalReceived + "\t\t\t\t\t| " + totalRelayed + "\t\t\t\t| " + totalPayloadSent + "\t\t| " + totalPayloadRecieved);
+        System.out.println("TOTAL\t| " + totalSent + "\t\t\t| " + totalReceived + "\t\t\t\t\t| " + totalRelayed + "\t\t\t\t| " + totalPayloadSent + "\t\t| " + totalPayloadRecieved );
+        System.out.print("Command:");
     }
 
     //Closes the server socket.
