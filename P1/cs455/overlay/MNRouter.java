@@ -9,10 +9,12 @@ public class MNRouter implements Runnable{
 
     private MessageType process;
     private MessagingNode messager;
+    private MNServer server;
 
-    public MNRouter(Socket sockit, MessagingNode messager) throws IOException{
+    public MNRouter(Socket sockit, MessagingNode messager, MNServer server) throws IOException{
 
         this.messager = messager;
+        this.server = server;
         try{
             DataInputStream incoming = new DataInputStream(sockit.getInputStream());
             process = new MessageType(incoming);
@@ -42,6 +44,7 @@ public class MNRouter implements Runnable{
             }
         }
         catch(IOException e){
+            server.routerIsDone();
             //Socket was closed, that's okay :)
         }
     }

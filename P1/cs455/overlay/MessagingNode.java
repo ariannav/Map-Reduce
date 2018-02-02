@@ -57,6 +57,7 @@ public class MessagingNode{
     private boolean inProgress;
     private boolean isFinished;
     private Statistics stats;
+    private boolean ready;
 
 
     public MessagingNode(String registryHost, String registryPort){
@@ -93,6 +94,7 @@ public class MessagingNode{
          creator = new MessageCreator(this);
          inProgress = false;
          isFinished = false;
+         ready = false;
          stats = new Statistics();
     }
 
@@ -143,7 +145,8 @@ public class MessagingNode{
                     sendMessage(10);
                 }
                 else if(type == 11){
-                    Thread.sleep(100);
+                    while(!ready){      //Waiting for routers to finish.
+                    }
                     sendMessage(12);
                     resetCounters();
                     //Done! Congrats!
@@ -366,5 +369,9 @@ public class MessagingNode{
             System.exit(-1);
         }
         System.exit(0);
+    }
+
+    public void ready(){
+        ready = true;
     }
 }
