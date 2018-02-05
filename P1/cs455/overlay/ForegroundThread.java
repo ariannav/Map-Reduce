@@ -27,12 +27,21 @@ public class ForegroundThread implements Runnable{
                     break;
                 case "setup-overlay":
                     try{
-                        overlaySetup = true;
                         int numEntries = Integer.parseInt(word[1]);
+                        if(numEntries*2 >= registry.getNumNodes()){
+                            System.out.println("Number of nodes in the overlay: " + registry.getNumNodes() + ". Please give an overlay size < " + registry.getNumNodes()/2);
+                            break;
+                        }
                         registry.setupOverlay(numEntries);
+                        overlaySetup = true;
                     }
                     catch(Exception e){
+                        if(6 >= registry.getNumNodes()){
+                            System.out.println("Number of nodes in the overlay: " + registry.getNumNodes() + ". Please give an overlay size < " + registry.getNumNodes()/2);
+                            break;
+                        }
                         registry.setupOverlay(3);       //3 is the default value
+                        overlaySetup = true;
                     }
                     break;
                 case "list-routing-tables":

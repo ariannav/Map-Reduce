@@ -165,6 +165,13 @@ public class Registry implements Comparator<NodeContainer>{
 
 
     public void requestTrafficSummary(){
+        System.out.print("One moment...");
+        try{
+            Thread.sleep(15000);
+        }
+        catch(InterruptedException e){
+            System.out.println("Sleep was interrupted. Statistics may not be accurate as a result.");
+        }
         for(int i = 0; i < registries.size(); i++){
             registries.get(i).getTrafficSummary();
         }
@@ -207,6 +214,7 @@ public class Registry implements Comparator<NodeContainer>{
     public synchronized void incrementTaskComplete(){
         finished++;
         if(finished == nodes.size()){
+            finished = 0;
             requestTrafficSummary();
             allStatistics = new ArrayList<>(nodes.size());
         }

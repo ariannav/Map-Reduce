@@ -126,6 +126,7 @@ public class RegistryNode implements Runnable{
     }
 
 
+
     public void setupOverlay(){
         try{
             sendMessage(6);

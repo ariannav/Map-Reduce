@@ -143,7 +143,6 @@ public class MessagingNode{
                     sendMessage(10);
                 }
                 else if(type == 11){
-                    Thread.sleep(200);
                     sendMessage(12);
                     resetCounters();
                     //Done! Congrats!
@@ -321,9 +320,9 @@ public class MessagingNode{
 
 
     public String getDiagnostics(){
-        String answer = "\nNode ID\t| Packets Sent\t| Packets Received\t| Packets Relayed\t| Sum Values Sent\t| Sum Values Received"
-                        + nodeID + "\t\t| " + stats.packetsSent + "\t\t\t| " + stats.packetsRecvd + "\t\t\t\t\t| " + stats.packetsRelayed
-                + "\t\t\t\t| " + stats.sumValuesSent + "\t\t| " + stats.sumValuesRecvd;
+        String answer = "\nNode ID\t| Packets Sent\t| Packets Received\t| Packets Relayed\t| Sum Values Sent\t| Sum Values Received\n"
+                        + nodeID + "\t\t| " + stats.packetsSent + "\t\t\t\t| " + stats.packetsRecvd + "\t\t\t\t\t| " + stats.packetsRelayed
+                + "\t\t\t\t| " + stats.sumValuesSent + "\t\t\t\t| " + stats.sumValuesRecvd;
         return answer;
     }
 
