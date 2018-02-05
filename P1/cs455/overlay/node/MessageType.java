@@ -1,4 +1,4 @@
-package cs455.overlay;
+package cs455.overlay.node;
 
 import java.io.DataInputStream;
 import java.io.IOException;

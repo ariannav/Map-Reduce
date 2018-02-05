@@ -6,7 +6,7 @@ methods below are ordered 2-12. Either a RegistryNode
 or a MessagingNode can instantiate this class.
  */
 
-package cs455.overlay;
+package cs455.overlay.node;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
