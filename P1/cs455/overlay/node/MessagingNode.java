@@ -312,7 +312,7 @@ public class MessagingNode{
     public String printRoutingTable(){
         String routingTable = "NodeID: " + nodeID + "\nDistance | NodeID \n";
         for(int i = 0; i < process.getOverlay().length; i++){
-            routingTable += Math.pow(2, i) + "\t\t| " +  process.getOverlay()[i].getNodeID() + "\n";
+            routingTable += Math.pow(2, i) + " \t| " +  process.getOverlay()[i].getNodeID() + "\n";
         }
         routingTable += "Size: " + process.getOverlay().length + "\n\n";
         return routingTable;
@@ -321,8 +321,8 @@ public class MessagingNode{
 
     public String getDiagnostics(){
         String answer = "\nNode ID\t| Packets Sent\t| Packets Received\t| Packets Relayed\t| Sum Values Sent\t| Sum Values Received\n"
-                        + nodeID + "\t\t| " + stats.packetsSent + "\t\t\t\t| " + stats.packetsRecvd + "\t\t\t\t\t| " + stats.packetsRelayed
-                + "\t\t\t\t| " + stats.sumValuesSent + "\t\t\t\t| " + stats.sumValuesRecvd;
+                        + nodeID + "\t| " + stats.packetsSent + "\t\t| " + stats.packetsRecvd + "\t\t\t| " + stats.packetsRelayed
+                + "\t\t\t| " + stats.sumValuesSent + "\t\t| " + stats.sumValuesRecvd + "\n";
         return answer;
     }
 

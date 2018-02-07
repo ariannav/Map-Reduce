@@ -34,6 +34,7 @@ public class ForegroundThread implements Runnable{
                         }
                         registry.setupOverlay(numEntries);
                         overlaySetup = true;
+                        System.out.println("Registry now ready to initiate tasks.");
                     }
                     catch(Exception e){
                         if(6 >= registry.getNumNodes()){
@@ -42,6 +43,7 @@ public class ForegroundThread implements Runnable{
                         }
                         registry.setupOverlay(3);       //3 is the default value
                         overlaySetup = true;
+                        System.out.println("Registry now ready to initiate tasks.");
                     }
                     break;
                 case "list-routing-tables":

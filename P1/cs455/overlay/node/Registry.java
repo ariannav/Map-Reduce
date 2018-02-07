@@ -120,7 +120,7 @@ public class Registry implements Comparator<NodeContainer>{
     }
 
 
-    public synchronized int deregisterNode(NodeContainer node){
+    public synchronized int deregisterNode(NodeContainer node, RegistryNode registry){
         //If node previously not previously registered, return -1.
         for(int i = 0; i < nodes.size(); i++){
             if(nodes.get(i).getNodeID() == node.getNodeID()){
@@ -128,6 +128,8 @@ public class Registry implements Comparator<NodeContainer>{
                 return 1; //Success!
             }
         }
+
+        registries.remove(registry);
 
         node.setNodeID(-1);
         return 0; //Fail!
@@ -158,6 +160,7 @@ public class Registry implements Comparator<NodeContainer>{
         if(ready != nodes.size()){
             System.out.println("Not all messenger nodes are ready. Please try again.");
         }
+        System.out.println("Please wait... ");
         for(int j = 0; j < registries.size(); j++){
             registries.get(j).tellMessagerToSend(numMessages);
         }
@@ -264,20 +267,20 @@ public class Registry implements Comparator<NodeContainer>{
     }
 
     private void printStatistics(){
-        System.out.println("\nNode ID\t| Packets Sent\t| Packets Received\t| Packets Relayed\t| Sum Values Sent\t| Sum Values Received");
+        System.out.println("\nNode ID\t| Packets Sent\t| Packets Received | Packets Relayed\t| Sum Values Sent | Sum Values Received");
         int totalSent = 0, totalReceived = 0, totalRelayed = 0;
         long totalPayloadSent = 0, totalPayloadRecieved = 0;
         for(int i = 0; i < allStatistics.size(); i++){
             Statistics thisNode = allStatistics.get(i);
-            System.out.println(thisNode.nodeID + "\t\t| " + thisNode.packetsSent + "\t\t\t| " + thisNode.packetsRecvd + "\t\t\t\t\t| " + thisNode.packetsRelayed
-                    + "\t\t\t\t| " + thisNode.sumValuesSent + "\t\t| " + thisNode.sumValuesRecvd);
+            System.out.println(thisNode.nodeID + "\t| " + thisNode.packetsSent + "\t\t| " + thisNode.packetsRecvd + "\t\t\t| " + thisNode.packetsRelayed
+                    + "\t\t\t| " + thisNode.sumValuesSent + "\t| " + thisNode.sumValuesRecvd);
             totalSent += thisNode.packetsSent;
             totalReceived += thisNode.packetsRecvd;
             totalRelayed += thisNode.packetsRelayed;
             totalPayloadSent += thisNode.sumValuesSent;
             totalPayloadRecieved += thisNode.sumValuesRecvd;
         }
-        System.out.println("TOTAL\t| " + totalSent + "\t\t\t| " + totalReceived + "\t\t\t\t\t| " + totalRelayed + "\t\t\t\t| " + totalPayloadSent + "\t\t| " + totalPayloadRecieved );
+        System.out.println("TOTAL\t| " + totalSent + "\t\t| " + totalReceived + "\t\t\t| " + totalRelayed + "\t\t\t| " + totalPayloadSent + "\t| " + totalPayloadRecieved );
         System.out.print("Command:");
     }
 

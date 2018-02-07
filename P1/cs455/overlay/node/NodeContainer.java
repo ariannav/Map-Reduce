@@ -41,10 +41,10 @@ public class NodeContainer{
     }
 
     public String getRoutingTableString() {
-        String routingTable = "Distance|Node ID| Hostname\t\t\t\t\t| Port\n";
+        String routingTable = "Distance|Node ID| Hostname\t\t\t| Port\n";
         for (int i = 0; i < overlay.size(); i++) {
-            routingTable += Math.pow(2,i) + "\t\t| " + overlay.get(i).getNodeID()
-                            + "\t| " + overlay.get(i).getHostname() + "\t\t| " + overlay.get(i).getPort() + "\n";
+            routingTable += Math.pow(2,i) + "\t| " + overlay.get(i).getNodeID()
+                            + "\t| " + overlay.get(i).getHostname() + "\t| " + overlay.get(i).getPort() + "\n";
         }
         return routingTable;
     }

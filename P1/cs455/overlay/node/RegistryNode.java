@@ -44,7 +44,7 @@ public class RegistryNode implements Runnable{
             register(); //Sends message type 3.
         }
         catch(IOException e){
-            System.err.println("Error: Rare occurrence of Messenger Node failing after registration request. Node was not registered. Exiting. ");
+            registry.deregisterNode(thisNode, this);
             flushCloseExit();
         }
 
@@ -77,7 +77,7 @@ public class RegistryNode implements Runnable{
                     break;
                 }
                 else{
-                    System.out.println(e );
+                    registry.deregisterNode(thisNode, this);
                     flushCloseExit();
                 }
             }
@@ -118,7 +118,7 @@ public class RegistryNode implements Runnable{
             sendMessage(5);
             throw new IOException("interrupt");
         }
-        else if(registry.deregisterNode(thisNode) == 0){
+        else if(registry.deregisterNode(thisNode, this) == 0){
             //Deregister failed, thisNode.getID() should return -1 now.
             sendMessage(5);
             throw new IOException("interrupt");
@@ -132,7 +132,7 @@ public class RegistryNode implements Runnable{
             sendMessage(6);
         }
         catch(IOException e){
-            registry.deregisterNode(thisNode);
+            registry.deregisterNode(thisNode, this);
             flushCloseExit();
         }
     }
@@ -144,7 +144,7 @@ public class RegistryNode implements Runnable{
             sendMessage(8);
         }
         catch(IOException e){
-            registry.deregisterNode(thisNode);
+            registry.deregisterNode(thisNode, this);
             flushCloseExit();
         }
     }

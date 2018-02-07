@@ -24,8 +24,8 @@ public class MessagingForegroundThread implements Runnable{
 
             switch (word[0]) {
                 case "print-counters-and-diagnostics":
-                    if(messager.isInProgress() || !messager.isFinished()){
-                        System.out.println("Cannot print diagnostics until message sending is complete.");
+                    if(!messager.isInProgress() && !messager.isFinished()){
+                        System.out.println("Cannot print diagnostics until message sending begins.");
                         break;
                     }
                     System.out.println(messager.getDiagnostics());
