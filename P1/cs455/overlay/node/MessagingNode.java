@@ -150,7 +150,8 @@ public class MessagingNode{
 
             }
             catch(Exception e){
-                System.err.println(e);
+                System.err.println("Problem in messaging node: " +e);
+                e.printStackTrace();
                 System.exit(1);
                 flushCloseExit();
             }
@@ -198,6 +199,10 @@ public class MessagingNode{
     public void sendTo(int source, int dest, int payload, int[] trace) throws IOException{
         int closest = -1;
         int index = -1;
+        if(process.getOverlay().length == 1){
+            process.getOverlay()[0].getEndpoint().sendTo(source, dest, payload, trace);
+            return;
+        }
         for(int i = 0; i < process.getOverlay().length; i++){
             int currNodeID = process.getOverlay()[i].getNodeID();
             if(currNodeID <= dest && currNodeID > closest){

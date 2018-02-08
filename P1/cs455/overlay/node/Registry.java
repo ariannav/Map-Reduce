@@ -272,7 +272,7 @@ public class Registry implements Comparator<NodeContainer>{
         long totalPayloadSent = 0, totalPayloadRecieved = 0;
         for(int i = 0; i < allStatistics.size(); i++){
             Statistics thisNode = allStatistics.get(i);
-            System.out.println(thisNode.nodeID + "\t| " + thisNode.packetsSent + "\t\t| " + thisNode.packetsRecvd + "\t\t\t| " + thisNode.packetsRelayed
+            System.out.println(thisNode.nodeID + "\t| " + thisNode.packetsSent + "\t\t| " + thisNode.packetsRecvd + "\t\t| " + thisNode.packetsRelayed
                     + "\t\t\t| " + thisNode.sumValuesSent + "\t| " + thisNode.sumValuesRecvd);
             totalSent += thisNode.packetsSent;
             totalReceived += thisNode.packetsRecvd;
@@ -280,7 +280,7 @@ public class Registry implements Comparator<NodeContainer>{
             totalPayloadSent += thisNode.sumValuesSent;
             totalPayloadRecieved += thisNode.sumValuesRecvd;
         }
-        System.out.println("TOTAL\t| " + totalSent + "\t\t| " + totalReceived + "\t\t\t| " + totalRelayed + "\t\t\t| " + totalPayloadSent + "\t| " + totalPayloadRecieved );
+        System.out.println("TOTAL\t| " + totalSent + "\t| " + totalReceived + "\t| " + totalRelayed + "\t\t\t| " + totalPayloadSent + "\t| " + totalPayloadRecieved );
         System.out.print("Command:");
     }
 

@@ -39,8 +39,8 @@ public class MNEndpoint implements Runnable{
 
 
     public void sendTo(int sourceID, int destNodeID, int payload, int[] trace) throws IOException{
+        System.out.println("ST" + neighbor.getNodeID());
         byte[] message = creator.createMessageType9(sourceID, destNodeID, payload, trace);
-
         outgoing.write(message, 0, message.length);
         outgoing.flush();
     }
