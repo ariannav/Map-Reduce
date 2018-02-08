@@ -1,3 +1,6 @@
+//Author: Arianna Vacca
+//Purpose: The MN Router is connected to MessagingNodes that have this MN in their routing table. MNR forwards and keeps messages.
+
 package cs455.overlay.node;
 
 import java.io.DataInputStream;
@@ -10,6 +13,7 @@ public class MNRouter implements Runnable{
     private MessageType process;
     private MessagingNode messager;
     private MNServer server;
+
 
     public MNRouter(Socket sockit, MessagingNode messager, MNServer server) throws IOException{
 

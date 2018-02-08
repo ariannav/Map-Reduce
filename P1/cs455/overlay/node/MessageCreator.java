@@ -1,10 +1,5 @@
 //Author: Arianna Vacca
-
-/*This class creates the different message types and
-returns a byte array to be sent. The message creator
-methods below are ordered 2-12. Either a RegistryNode
-or a MessagingNode can instantiate this class.
- */
+//Purpose: Creates each message type for Registry and MessagingNode. Returns byte array.
 
 package cs455.overlay.node;
 
@@ -58,7 +53,7 @@ public class MessageCreator {
             bMessage = infoString.getBytes("ASCII");
         }
         catch(IOException e){
-            System.out.println("Cannot create message type 3. " + e);
+            System.out.println("Message Creator: Cannot create message type 3. " + e);
             System.exit(-1);
         }
 
@@ -109,7 +104,7 @@ public class MessageCreator {
             bMessage = infoString.getBytes("ASCII");
         }
         catch(IOException e){
-            System.out.println("Cannot create message type 5. " + e);
+            System.out.println("Message Creator: Cannot create message type 5. " + e);
             System.exit(-1);
         }
 
@@ -158,7 +153,7 @@ public class MessageCreator {
             bMessage = infoString.getBytes("ASCII");
         }
         catch(IOException e){
-            System.out.println("Cannot create message type 7. " + e);
+            System.out.println("Message Creator: Cannot create message type 7. " + e);
             System.exit(-1);
         }
 

@@ -1,3 +1,6 @@
+//Author: Arianna Vacca
+//Purpose: This is the main infrastructure for the Registry. It acts as a server and creates Registry Nodes for connecting MN. Also orchestrates the actions of these nodes. 
+
 package cs455.overlay.node;
 
 import java.net.InetAddress;

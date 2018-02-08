@@ -1,3 +1,6 @@
+//Author: Arianna Vacca
+//Purpose: This class connects to each MessagingNode within the parent thread's routing table.
+
 package cs455.overlay.node;
 
 import java.io.DataInputStream;
@@ -16,8 +19,8 @@ public class MNEndpoint implements Runnable{
     private Socket sockit;
     private DataOutputStream outgoing;
     private DataInputStream incoming;
-    private MessageCreator creator;
     private ConcurrentLinkedQueue<byte[]> queue;
+
 
     public MNEndpoint(MessagingNode messager, NodeContainer neighbor){
         this.messager = messager;
@@ -29,10 +32,9 @@ public class MNEndpoint implements Runnable{
             incoming = new DataInputStream(sockit.getInputStream());
         }
         catch(IOException e){
-            System.out.println("Cannot create messaging node. Could not connect to registry. Please try again.");
+            System.out.println("MessagingNode Endpoint: Could not create endpoint. Connection to " + neighbor.getNodeID() + " failed.");
             flushCloseExit();
         }
-        creator = new MessageCreator(messager);
         queue = new ConcurrentLinkedQueue<>();
     }
 
@@ -49,8 +51,7 @@ public class MNEndpoint implements Runnable{
                     outgoing.flush();
                 }
                 catch(IOException e){
-                    System.out.println("Problem reading from queue: " + e);
-                    e.printStackTrace();
+                    System.out.println("MessagingNode Endpoint: Message sending for connection " + neighbor.getNodeID() + " failed-" + e + ". Retrying.");
                 }
             }
         }
@@ -73,7 +74,7 @@ public class MNEndpoint implements Runnable{
             sockit.close();
         }
         catch (IOException e){
-            System.exit(-1);
+            //Connection could be closed already.
         }
         System.exit(0);
     }

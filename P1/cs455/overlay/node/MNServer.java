@@ -1,3 +1,6 @@
+//Author: Arianna Vacca
+//Purpose: Accepts incoming connections on the MessagingNode from other MessagingNodes. Creates MNRouters.
+
 package cs455.overlay.node;
 
 import java.io.IOException;
@@ -29,7 +32,7 @@ public class MNServer implements Runnable{
                     sockit.close();
                 }
                 catch(IOException ioe){
-                    System.out.println("Cannot close sockit. " + ioe + " Received error: " + e);
+                    //That's fine, socket can close when done. If fails, it was already closed.
                 }
             }
 

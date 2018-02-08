@@ -1,3 +1,6 @@
+//Author: Arianna Vacca
+//Purpose: Primary thread which generates all other threads in MessagingNode process. Registry interactions occur through this thread.
+
 package cs455.overlay.node;
 
 import java.io.DataInputStream;
@@ -41,7 +44,7 @@ public class MessagingNode{
             messager.waitForMessage();
         }
         catch(Exception e){
-            System.out.println("Error encountered in main: " + e);
+            System.out.println("Messaging Node: Issue in main-" + e + " Please restart MessagingNode.");
         }
     }
 
@@ -59,16 +62,9 @@ public class MessagingNode{
     private Statistics stats;
 
 
-    public MessagingNode(String registryHost, String registryPort){
+    public MessagingNode(String registryHost, String registryPort) throws IOException{
 
-        try{
-            sockit = createServerSocket();
-        }
-        catch(IOException e){
-            System.out.println("Error creating server socket. " + e);
-            System.exit(-1);
-        }
-
+        sockit = createServerSocket();
         int port = 0;
 
         try{
@@ -76,24 +72,18 @@ public class MessagingNode{
             port = Integer.parseInt(registryPort);
         }
         catch(Exception e){
-            System.out.println("Provided IP address and/or port is not reachable. Please provide a valid IP address/port.");
-            flushCloseExit();
+            throw new IOException("Provided IP address and/or port is not reachable. Please provide a valid IP address/port.");
         }
 
-        try{
-            registrySockit = new Socket(registryHost, port);
-            outgoing = new DataOutputStream(registrySockit.getOutputStream());
-            incoming = new DataInputStream(registrySockit.getInputStream());
-        }
-        catch(IOException e){
-            System.out.println("Cannot create messaging node. Could not connect to registry. Please try again.");
-            flushCloseExit();
-        }
-         process =  new MessageType(incoming);
-         creator = new MessageCreator(this);
-         inProgress = false;
-         isFinished = false;
-         stats = new Statistics();
+        registrySockit = new Socket(registryHost, port);
+        outgoing = new DataOutputStream(registrySockit.getOutputStream());
+        incoming = new DataInputStream(registrySockit.getInputStream());
+
+        process =  new MessageType(incoming);
+        creator = new MessageCreator(this);
+        inProgress = false;
+        isFinished = false;
+        stats = new Statistics();
     }
 
 
@@ -147,13 +137,14 @@ public class MessagingNode{
                     resetCounters();
                     //Done! Congrats!
                 }
-
+                else{
+                    throw new IOException("Wrong message type received. Messaging node resuming operations.");
+                }
             }
             catch(Exception e){
-                System.err.println("Problem in messaging node: " +e);
-                e.printStackTrace();
-                System.exit(1);
-                flushCloseExit();
+                System.err.println("Messaging Node: Issue in control center-" +e);
+                //e.printStackTrace();
+                continue;
             }
         }
     }
@@ -178,7 +169,7 @@ public class MessagingNode{
     }
 
 
-    private void startSendingMessages() throws IOException{
+    private void startSendingMessages(){
         Random randomGenerator  = new Random();
         int nextID;
         for(int i = 0; i < process.getNumMessages(); i++){
@@ -186,17 +177,18 @@ public class MessagingNode{
             while(process.getNodeIDs()[nextID] == nodeID){
                 nextID = randomGenerator.nextInt(process.getNodeIDs().length);
             }
+
             int payload = randomGenerator.nextInt();
             int[] trace = {};
             sendTo(nodeID, process.getNodeIDs()[nextID], payload, trace);
+
             addPacketSent();
             addPayload(payload);
         }
-
     }
 
 
-    public synchronized void sendTo(int source, int dest, int payload, int[] trace) throws IOException{
+    public synchronized void sendTo(int source, int dest, int payload, int[] trace){
         int closest = -1;
         int index = -1;
 
@@ -257,7 +249,7 @@ public class MessagingNode{
             outgoing.flush();
         }
         catch(IOException e){
-            System.out.println("Problem sending message." + e);
+            System.out.println("Messaging Node: Problem sending message-" + e);
         }
 
     }
@@ -367,7 +359,7 @@ public class MessagingNode{
             sockit.close();
         }
         catch (IOException e){
-            System.exit(-1);
+            //Could mean it is already closed, that is okay, exiting anyways.
         }
         System.exit(0);
     }

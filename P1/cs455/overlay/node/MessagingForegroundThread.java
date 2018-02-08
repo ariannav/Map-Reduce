@@ -1,3 +1,6 @@
+//Author: Arianna Vacca
+//Purpose: This class reads from the command line for the MessagingNode process.
+
 package cs455.overlay.node;
 
 import java.util.Scanner;

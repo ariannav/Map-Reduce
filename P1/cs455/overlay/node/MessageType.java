@@ -1,3 +1,6 @@
+//Author: Arianna Vacca
+//Purpose: Processes each type of message for the MessagingNode and Registry.
+
 package cs455.overlay.node;
 
 import java.io.DataInputStream;
@@ -42,7 +45,7 @@ public class MessageType {
     public void processType2() throws IOException{ //OVERLAY_NODE_SENDS_REGISTRATION
         lastType = incoming.readByte();
         if(lastType != 2){
-            throw new IOException("Incorrect message type received: " + lastType);
+            throw new IOException("Message Processor: Incorrect message type received-" + lastType);
         }
 
         byte ipLength = incoming.readByte();
@@ -72,7 +75,7 @@ public class MessageType {
                 processType12();
                 break;
             default:
-                throw new IOException("Incorrect type number. Type received: " + lastType);
+                throw new IOException("Message Processor: Incorrect message type received-" + lastType);
         }
     }
 
@@ -101,7 +104,7 @@ public class MessageType {
         incoming.read(infoString, 0, length);
 
         if(nodeID == -1 ) {
-            throw new IOException("Node was unable to setup overlay. " + getInfoString());
+            throw new IOException("Message Processor: Node was unable to setup overlay. " + getInfoString());
         }
     }
 
@@ -136,7 +139,7 @@ public class MessageType {
         incoming.read(infoString, 0, infoStringLength);
 
         if(nodeID == -1){
-            throw new IOException("Message Node was not successfully registered. NodeID -1. " + getInfoString());
+            throw new IOException("Message Processor: Message Node was not successfully registered. NodeID -1. " + getInfoString());
         }
     }
 
@@ -158,7 +161,7 @@ public class MessageType {
                 //processType11();  <= Not needed, Type 11 only contains the message type.
                 break;
             default:
-                throw new IOException("Incorrect type number. Type received: " + lastType);
+                throw new IOException("Message Processor: Incorrect type number. Type received: " + lastType);
         }
     }
 
@@ -197,10 +200,6 @@ public class MessageType {
         numMessages = incoming.readInt();
     }
 
-
-    //private void processType11(){  //REGISTRY_REQUESTS_TRAFFIC_SUMMARY
-        //Dummy method for readability's sake. This message only contains the type bit- already been processed!
-    //}
 
     //=================================FROM MESSENGER TO MESSENGER======================================================
 
