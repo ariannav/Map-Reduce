@@ -44,8 +44,6 @@ public class MNRouter implements Runnable{
         }
         catch(IOException e){
             //Socket was closed, that's okay :)
-            System.out.println("Problem with Router.");
-            e.printStackTrace();
         }
     }
 }

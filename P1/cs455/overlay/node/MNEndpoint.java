@@ -5,6 +5,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.SynchronousQueue;
 
 public class MNEndpoint implements Runnable{
 
@@ -14,6 +17,7 @@ public class MNEndpoint implements Runnable{
     private DataOutputStream outgoing;
     private DataInputStream incoming;
     private MessageCreator creator;
+    private ConcurrentLinkedQueue<byte[]> queue;
 
     public MNEndpoint(MessagingNode messager, NodeContainer neighbor){
         this.messager = messager;
@@ -29,20 +33,32 @@ public class MNEndpoint implements Runnable{
             flushCloseExit();
         }
         creator = new MessageCreator(messager);
+        queue = new ConcurrentLinkedQueue<>();
     }
 
 
     @Override
     public void run() {
         messager.endpointIsReady(this, neighbor.getNodeID());
+
+        while(true){
+            byte[] message = queue.poll();
+            if(message != null){
+                try{
+                    outgoing.write(message, 0, message.length);
+                    outgoing.flush();
+                }
+                catch(IOException e){
+                    System.out.println("Problem reading from queue: " + e);
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
 
-    public void sendTo(int sourceID, int destNodeID, int payload, int[] trace) throws IOException{
-        System.out.println("ST" + neighbor.getNodeID());
-        byte[] message = creator.createMessageType9(sourceID, destNodeID, payload, trace);
-        outgoing.write(message, 0, message.length);
-        outgoing.flush();
+    public void addToQueue(byte[] message){
+        queue.add(message);
     }
 
 
