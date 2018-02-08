@@ -1,3 +1,6 @@
+//Author: Arianna Vacca
+//Purpose: Container classes for messenger nodes. In use by the Registry and MessagingNode class.
+
 package cs455.overlay.node;
 
 import java.util.ArrayList;

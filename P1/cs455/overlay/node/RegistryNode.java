@@ -1,3 +1,6 @@
+//Author: Arianna Vacca
+//Purpose: Each RegistryNode is connected to one MessagingNode. RN details the interactions between the Registry and the MN.
+
 package cs455.overlay.node;
 
 import java.io.DataInputStream;
@@ -132,6 +135,7 @@ public class RegistryNode implements Runnable{
             sendMessage(6);
         }
         catch(IOException e){
+            System.out.println("Registry Node: Unable to setup overlay. Messenger node " + nodeID + " failed. Deregistering node.");
             registry.deregisterNode(thisNode, this);
             flushCloseExit();
         }
@@ -208,6 +212,5 @@ public class RegistryNode implements Runnable{
         catch (Exception e){
             Thread.currentThread().interrupt();
         }
-        Thread.currentThread().interrupt();
     }
 }

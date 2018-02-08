@@ -1,5 +1,5 @@
 //Author: Arianna Vacca
-//Purpose: This is the main infrastructure for the Registry. It acts as a server and creates Registry Nodes for connecting MN. Also orchestrates the actions of these nodes. 
+//Purpose: This is the main infrastructure for the Registry. It acts as a server and creates Registry Nodes for connecting MN. Also orchestrates the actions of these nodes.
 
 package cs455.overlay.node;
 
@@ -54,7 +54,7 @@ public class Registry implements Comparator<NodeContainer>{
             finished = 0;
         }
         catch(IOException e){
-            System.out.println("Error encountered creating socket." + e + "\n");
+            System.out.println("Registry: Error encountered creating socket." + e + "\n");
         }
     }
 
@@ -88,7 +88,7 @@ public class Registry implements Comparator<NodeContainer>{
                 newThread.start();
             }
             catch(Exception e){
-                System.out.println("Problem accepting connection on registry server socket. " + e);
+                System.out.println("Registry: Problem accepting connection on registry server socket. " + e);
             }
 
         }
@@ -283,7 +283,7 @@ public class Registry implements Comparator<NodeContainer>{
             totalPayloadSent += thisNode.sumValuesSent;
             totalPayloadRecieved += thisNode.sumValuesRecvd;
         }
-        System.out.println("TOTAL\t| " + totalSent + "\t| " + totalReceived + "\t| " + totalRelayed + "\t\t\t| " + totalPayloadSent + "\t| " + totalPayloadRecieved );
+        System.out.println("TOTAL\t| " + totalSent + "\t| " + totalReceived + "\t| " + totalRelayed + "\t\t| " + totalPayloadSent + "\t| " + totalPayloadRecieved );
         System.out.print("Command:");
     }
 

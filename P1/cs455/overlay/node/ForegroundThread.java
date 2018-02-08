@@ -1,3 +1,6 @@
+//Author: Arianna Vacca
+//Purpose: Registry's foreground thread.
+
 package cs455.overlay.node;
 
 import java.util.Scanner;

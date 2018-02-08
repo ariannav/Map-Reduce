@@ -138,13 +138,12 @@ public class MessagingNode{
                     //Done! Congrats!
                 }
                 else{
-                    throw new IOException("Wrong message type received. Messaging node resuming operations.");
+                    System.out.println("Wrong message type received. Messaging node resuming operations.");
                 }
             }
             catch(Exception e){
                 System.err.println("Messaging Node: Issue in control center-" +e);
                 //e.printStackTrace();
-                continue;
             }
         }
     }

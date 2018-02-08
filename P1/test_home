@@ -2,4 +2,4 @@ test_home=/s/bach/m/under/arivacca/IdeaProjects/455/P1
 for i in `cat machine_list`
 do
 echo 'logging into' ${i}
-gnome-terminal -x bash -c "ssh -t ${i} 'cd ${test_home}; java cs455.overlay.node.MessagingNode 129.82.45.129 7014;bash;'" & done
+gnome-terminal -x bash -c "ssh -t ${i} 'cd ${test_home}; java cs455.overlay.node.MessagingNode 129.82.44.140 7014;bash;'" & done
