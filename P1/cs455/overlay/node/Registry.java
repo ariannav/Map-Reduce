@@ -128,12 +128,10 @@ public class Registry implements Comparator<NodeContainer>{
         for(int i = 0; i < nodes.size(); i++){
             if(nodes.get(i).getNodeID() == node.getNodeID()){
                 nodes.remove(i);
+                registries.remove(registry);
                 return 1; //Success!
             }
         }
-
-        registries.remove(registry);
-
         node.setNodeID(-1);
         return 0; //Fail!
     }

@@ -143,6 +143,7 @@ public class MessagingNode{
             }
             catch(Exception e){
                 System.err.println("Messaging Node: Issue in control center-" +e);
+                break;
                 //e.printStackTrace();
             }
         }
