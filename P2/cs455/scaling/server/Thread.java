@@ -1,10 +1,11 @@
 package cs455.scaling.server;
 
-public class Thread {
+public class Thread implements Runnable{
 
     private Task task;
     private ThreadPoolManager manager;
 
+    //Constructor
     public Thread(ThreadPoolManager manager){
         this.manager = manager;
     }
@@ -15,8 +16,10 @@ public class Thread {
         }
     }
 
+
+    //Always does tasks, then waits for another. Works through wait/notify scheme.
     public synchronized void serve(){
-        //TODO: Add to thread pool manager list
+        manager.addToThreadQueue(this);
 
         try{
             wait();
@@ -25,6 +28,8 @@ public class Thread {
         task.run();
     }
 
+
+    //Thread pool manager uses this method to request a task to be completed.
     public synchronized void request(Task task){
         this.task = task;
         notify();

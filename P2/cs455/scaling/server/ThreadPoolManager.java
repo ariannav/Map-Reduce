@@ -9,12 +9,14 @@ public class ThreadPoolManager implements Runnable{
     private List<Task> taskQueue;
     private List<Thread> threadQueue;
 
+    //Constructor
     public ThreadPoolManager(){
         taskQueue = Collections.synchronizedList(new LinkedList<Task>());
         threadQueue = Collections.synchronizedList(new LinkedList<Thread>());
     }
 
 
+    //Always waits for a ready task, then sends it to a ready thread.
     public void run(){
         while(true){
             Task nextTask = getNextTask();
@@ -24,6 +26,7 @@ public class ThreadPoolManager implements Runnable{
     }
 
 
+    //Adds a thread to the thread ready queue.
     public void addToThreadQueue(Thread readyThread){
         synchronized(threadQueue){
             threadQueue.add(readyThread);
@@ -32,6 +35,7 @@ public class ThreadPoolManager implements Runnable{
     }
 
 
+    //Adds a task to the task ready queue.
     public void addToTaskQueue(Task task){
         synchronized(taskQueue){
             taskQueue.add(task);
@@ -40,6 +44,7 @@ public class ThreadPoolManager implements Runnable{
     }
 
 
+    //Grabs and removes the first task in the queue.
     public Task getNextTask(){
         Task nextTask;
         synchronized(taskQueue){
@@ -55,6 +60,7 @@ public class ThreadPoolManager implements Runnable{
     }
 
 
+    //Grabs and removes the first thread in the thread ready queue.
     public Thread getNextThread(){
         Thread nextThread;
         synchronized(threadQueue){
@@ -66,6 +72,6 @@ public class ThreadPoolManager implements Runnable{
             }
             nextThread = threadQueue.remove(0);
         }
-        return nextThread; 
+        return nextThread;
     }
 }
