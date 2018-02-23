@@ -179,7 +179,7 @@ public class Client implements Runnable{
             }
 
             synchronized(calculatedHashValues){
-                String returnedHash = SHA1FromBytes(buffer.array());
+                String returnedHash = new String(buffer.array());
                 if(calculatedHashValues.contains(returnedHash)){
                     calculatedHashValues.remove(returnedHash);
                     System.out.println("Got correct hash from server!");
