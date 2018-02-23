@@ -43,7 +43,7 @@ public class Server {
             serverSocket = ServerSocketChannel.open();
             serverSocket.configureBlocking(false);
             bindSocket(port);
-            serverSocket.register(selector, serverSocket.validOps());
+            serverSocket.register(selector, SelectionKey.OP_ACCEPT);
 
             //Setting the number of threads.
             this.numThreads = Integer.parseInt(numThreads);
@@ -103,14 +103,17 @@ public class Server {
                 //Iterating through the selected keys.
                 while(keys.hasNext()){
                     SelectionKey key = keys.next();
-                    if(key.isAcceptable()){
+                    keys.remove();
+
+                    if(!key.isValid()){
+                        continue;
+                    }
+                    else if(key.isAcceptable()){
                         acceptKey(key);
                     }
                     else if(key.isReadable()){
-                        System.out.println("Is readable.");
                         createReadTask(key);
                     }
-                    keys.remove();
                 }
             }
         }

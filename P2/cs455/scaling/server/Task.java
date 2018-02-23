@@ -27,7 +27,6 @@ public class Task implements Runnable{
             write(returnMessage);
         }
         catch(Exception e){
-            //TODO: Cancel the key and close the socket channel.
             System.out.println("Task/Run/" + e);
         }
     }
@@ -35,21 +34,29 @@ public class Task implements Runnable{
 
     //Reads from the key.
     private void read() throws IOException {
+        SocketChannel channel = (SocketChannel) key.channel();
         try{
             //Creating the channel, and reading the 8KB message.
-            SocketChannel channel = (SocketChannel) key.channel();
             buffer = ByteBuffer.allocate(8000);
+            buffer.clear();
             int read = 0;
 
             while(buffer.hasRemaining() && read != -1){
                 read = channel.read(buffer);
             }
-            //TODO: Catch you may want to cancel the key and close the socket.
-            //TODO: Need to flip buffer?
 
+            if(read == -1){
+                channel.close();
+                key.cancel();
+                return;
+            }
+
+            buffer.flip();
             key.interestOps(SelectionKey.OP_WRITE);
         }
         catch(IOException e){
+            channel.close();
+            key.cancel();
             throw new IOException("Read: " + e);
         }
     }
@@ -75,16 +82,9 @@ public class Task implements Runnable{
         try {
             //Writing to the channel
             SocketChannel channel = (SocketChannel) key.channel();
-
-            if (returnMessage.length() != 40) {
-                throw new IOException("Write: Message length is not 40 characters!");
+            channel.write(ByteBuffer.wrap(returnMessage.getBytes()));
+            key.interestOps(SelectionKey.OP_WRITE);
             }
-
-            buffer = ByteBuffer.wrap(returnMessage.getBytes());
-            buffer.flip();
-            channel.write(buffer);
-            key.interestOps(SelectionKey.OP_READ);
-        }
         catch(IOException e){
             throw new IOException("Write: " + e);
         }
