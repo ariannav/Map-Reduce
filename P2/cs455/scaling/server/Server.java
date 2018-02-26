@@ -79,7 +79,6 @@ public class Server {
 
     //Starts the threads for the message processing, ThreadPoolManager, and the LoggingThread.
     private void startThreads(){
-        //TODO: Add thread for the counters.
         threadPoolManager = new ThreadPoolManager();
         java.lang.Thread tpManager = new java.lang.Thread(threadPoolManager);
         tpManager.start();
@@ -137,7 +136,6 @@ public class Server {
         }
 
         System.out.println("Accepting incoming connection.");
-        //TODO: Add the channel to a list or something to later determine mean/ std. deviation.
     }
 
 

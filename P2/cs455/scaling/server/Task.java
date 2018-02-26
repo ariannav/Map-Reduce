@@ -22,6 +22,7 @@ public class Task implements Runnable{
     //Runnable target run by the thread assigned to this task.
     public void run(){
         try{
+            System.out.println("Running task!");
             read();
             String returnMessage = SHA1FromBytes();
             write(returnMessage);
@@ -37,7 +38,7 @@ public class Task implements Runnable{
         SocketChannel channel = (SocketChannel) key.channel();
         try{
             //Creating the channel, and reading the 8KB message.
-            buffer = ByteBuffer.allocate(8000);
+            buffer = ByteBuffer.allocate(8);
             buffer.clear();
             int read = 0;
 
@@ -52,7 +53,7 @@ public class Task implements Runnable{
             }
 
             buffer.flip();
-            key.interestOps(SelectionKey.OP_WRITE);
+            //key.interestOps(SelectionKey.OP_WRITE);
         }
         catch(IOException e){
             channel.close();
@@ -69,7 +70,13 @@ public class Task implements Runnable{
             MessageDigest digest = MessageDigest.getInstance("SHA1");
             byte[] hash = digest.digest(buffer.array());
             BigInteger hashInt = new BigInteger(1, hash);
-            return hashInt.toString(16);
+            String returnString = hashInt.toString(16);
+
+            for(int i = returnString.length(); i < 40; i++){
+                returnString = returnString + returnString.charAt(0);
+            }
+
+            return returnString;
         }
         catch (NoSuchAlgorithmException n){
             throw new NoSuchAlgorithmException("SHA1FromBytes:" + n);
@@ -82,8 +89,9 @@ public class Task implements Runnable{
         try {
             //Writing to the channel
             SocketChannel channel = (SocketChannel) key.channel();
+            System.out.println("Sending:" + returnMessage);
             channel.write(ByteBuffer.wrap(returnMessage.getBytes()));
-            key.interestOps(SelectionKey.OP_WRITE);
+            key.interestOps(SelectionKey.OP_READ);
             }
         catch(IOException e){
             throw new IOException("Write: " + e);

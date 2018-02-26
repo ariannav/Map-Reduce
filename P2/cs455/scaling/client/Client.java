@@ -86,7 +86,6 @@ public class Client implements Runnable{
                         connect(key);
                     }
                     else if(key.isWritable() && writingKey == null){
-                        System.out.println("Creating writer thread.");
                         Thread writer = new Thread(this);
                         writingKey = key;
                         writer.start();
@@ -115,8 +114,8 @@ public class Client implements Runnable{
     public void run(){
         try{
             while(true){
-                System.out.println("Writing...");
                 write(writingKey);
+                log.incrementTotalSent();
                 Thread.sleep(1000/messagesPerSecond);
             }
         }
@@ -128,7 +127,6 @@ public class Client implements Runnable{
 
     //Writes a random byte array when isWritable()
     private void write(SelectionKey key) throws IOException{
-        System.out.println("Writing message.");
         SocketChannel channel = (SocketChannel) key.channel();
         channel.write(ByteBuffer.wrap(get8KBData()));
         key.interestOps(SelectionKey.OP_READ);
@@ -137,7 +135,7 @@ public class Client implements Runnable{
 
     //Generates an 8KB byte array and returns it.
     private byte[] get8KBData() throws IOException{
-        byte[] message = new byte[8000];
+        byte[] message = new byte[8];
         new Random().nextBytes(message);
         calculatedHashValues.add(SHA1FromBytes(message));
         return message;
@@ -151,7 +149,14 @@ public class Client implements Runnable{
             MessageDigest digest = MessageDigest.getInstance("SHA1");
             byte[] hash = digest.digest(message);
             BigInteger hashInt = new BigInteger(1, hash);
-            return hashInt.toString(16);
+            String returnString = hashInt.toString(16);
+
+            for(int i = returnString.length(); i < 40; i++){
+                returnString = returnString + returnString.charAt(0);
+            }
+
+            System.out.println("Calculated: " + returnString);
+            return returnString;
         }
         catch (NoSuchAlgorithmException n){
             throw new IOException("SHA1FromBytes:" + n);
@@ -169,7 +174,7 @@ public class Client implements Runnable{
         try{
             while(buffer.hasRemaining() && read != -1){
                 read = channel.read(buffer);
-                System.out.println("Read value: " + read);
+                //System.out.println("Read value: " + read);
             }
 
             if(read == -1){
@@ -178,14 +183,18 @@ public class Client implements Runnable{
                 return;
             }
 
+            buffer.flip();
+            log.incrementTotalReceived();
+
             synchronized(calculatedHashValues){
                 String returnedHash = new String(buffer.array());
+                System.out.println("Got:" + returnedHash);
                 if(calculatedHashValues.contains(returnedHash)){
                     calculatedHashValues.remove(returnedHash);
-                    System.out.println("Got correct hash from server!");
+                    //System.out.println("Got correct hash from server!");
                 }
                 else{
-                    throw new IOException("Incorrect hash from server!");
+                    throw new IOException("Incorrect hash from server! Received: " + returnedHash);
                 }
             }
         }

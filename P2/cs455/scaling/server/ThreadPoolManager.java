@@ -8,16 +8,21 @@ public class ThreadPoolManager implements Runnable{
 
     private List<Task> taskQueue;
     private List<Thread> threadQueue;
+    public ServerLogger log;
 
     //Constructor
     public ThreadPoolManager(){
         taskQueue = Collections.synchronizedList(new LinkedList<Task>());
         threadQueue = Collections.synchronizedList(new LinkedList<Thread>());
+        log = new ServerLogger();
     }
 
 
     //Always waits for a ready task, then sends it to a ready thread.
     public void run(){
+        java.lang.Thread loggerThread = new java.lang.Thread(log);
+        loggerThread.start();
+
         while(true){
             Task nextTask = getNextTask();
             Thread nextThread = getNextThread();

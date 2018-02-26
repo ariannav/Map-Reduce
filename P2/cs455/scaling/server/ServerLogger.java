@@ -1,14 +1,13 @@
-package cs455.scaling.client;
+package cs455.scaling.server;
 
+import java.lang.Thread;
 import java.sql.Timestamp;
 
-public class ClientLogger implements Runnable{
+public class ServerLogger implements Runnable{
 
-    private int totalSent;
     private int totalRecieved;
 
-    public ClientLogger(){
-        totalSent = 0;
+    public ServerLogger(){
         totalRecieved = 0;
     }
 
@@ -16,8 +15,7 @@ public class ClientLogger implements Runnable{
         while(true){
             synchronized(this){
                 Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                System.out.println("[" + timestamp + "] Total Sent Count: " + totalSent + ", Total Received Count: "+ totalRecieved);
-                totalSent = 0;
+                System.out.println("[" + timestamp + "] Total Received Count: "+ totalRecieved);
                 totalRecieved = 0;
             }
 
@@ -30,9 +28,6 @@ public class ClientLogger implements Runnable{
         }
     }
 
-    public synchronized void incrementTotalSent(){
-        totalSent++;
-    }
 
     public synchronized void incrementTotalReceived(){
         totalRecieved++;
