@@ -71,10 +71,6 @@ public class Task implements Runnable{
             BigInteger hashInt = new BigInteger(1, hash);
             String returnString = hashInt.toString(16);
 
-            for(int i = returnString.length(); i < 40; i++){
-                returnString = returnString + returnString.charAt(0);
-            }
-
             return returnString;
         }
         catch (NoSuchAlgorithmException n){
@@ -88,6 +84,10 @@ public class Task implements Runnable{
         try {
             //Writing to the channel
             SocketChannel channel = (SocketChannel) key.channel();
+            ByteBuffer length = ByteBuffer.allocate(4);
+            length.putInt(returnMessage.length());
+            length.rewind();
+            channel.write(length);
             channel.write(ByteBuffer.wrap(returnMessage.getBytes()));
 
             synchronized(key){

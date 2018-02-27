@@ -151,10 +151,6 @@ public class Client implements Runnable{
             BigInteger hashInt = new BigInteger(1, hash);
             String returnString = hashInt.toString(16);
 
-            for(int i = returnString.length(); i < 40; i++){
-                returnString = returnString + returnString.charAt(0);
-            }
-
             return returnString;
         }
         catch (NoSuchAlgorithmException n){
@@ -166,14 +162,23 @@ public class Client implements Runnable{
     //Reads from isReadable() channel.
     private void read(SelectionKey key) throws IOException{
         SocketChannel channel = (SocketChannel) key.channel();
-        ByteBuffer buffer = ByteBuffer.allocate(40);
+        ByteBuffer buffer = ByteBuffer.allocate(4);
         buffer.clear();
         int read = 0;
 
         try{
             while(buffer.hasRemaining() && read != -1){
                 read = channel.read(buffer);
-                //System.out.println("Read value: " + read);
+            }
+
+            buffer.rewind();
+            int length = buffer.getInt();
+
+            buffer = ByteBuffer.allocate(length);
+            buffer.clear();
+
+            while(buffer.hasRemaining() && read != -1){
+                read = channel.read(buffer);
             }
 
             if(read == -1){
