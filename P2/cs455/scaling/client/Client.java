@@ -135,7 +135,7 @@ public class Client implements Runnable{
 
     //Generates an 8KB byte array and returns it.
     private byte[] get8KBData() throws IOException{
-        byte[] message = new byte[8];
+        byte[] message = new byte[8000];
         new Random().nextBytes(message);
         calculatedHashValues.add(SHA1FromBytes(message));
         return message;
@@ -155,7 +155,6 @@ public class Client implements Runnable{
                 returnString = returnString + returnString.charAt(0);
             }
 
-            System.out.println("Calculated: " + returnString);
             return returnString;
         }
         catch (NoSuchAlgorithmException n){
@@ -188,10 +187,8 @@ public class Client implements Runnable{
 
             synchronized(calculatedHashValues){
                 String returnedHash = new String(buffer.array());
-                System.out.println("Got:" + returnedHash);
                 if(calculatedHashValues.contains(returnedHash)){
                     calculatedHashValues.remove(returnedHash);
-                    //System.out.println("Got correct hash from server!");
                 }
                 else{
                     throw new IOException("Incorrect hash from server! Received: " + returnedHash);

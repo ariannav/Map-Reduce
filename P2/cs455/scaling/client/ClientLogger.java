@@ -16,13 +16,13 @@ public class ClientLogger implements Runnable{
         while(true){
             synchronized(this){
                 Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-                System.out.println("[" + timestamp + "] Total Sent Count: " + totalSent + ", Total Received Count: "+ totalRecieved);
+                System.out.println("[" + timestamp + "] Total Sent Count: " + totalSent + ", Total Received Count: "+ totalRecieved );
                 totalSent = 0;
                 totalRecieved = 0;
             }
 
             try{
-                Thread.sleep(10000);    //TODO: Change to 20000
+                Thread.sleep(20000);
             }
             catch(InterruptedException e){
                 System.out.println("Client Logger was interrupted. " + e);

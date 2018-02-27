@@ -31,6 +31,8 @@ public class Server {
     private ServerSocketChannel serverSocket;
     private Selector selector;
     private ThreadPoolManager threadPoolManager;
+    private ServerLogger log;
+
 
     //Constructor
     public Server(String port, String numThreads) throws IOException{
@@ -79,6 +81,10 @@ public class Server {
 
     //Starts the threads for the message processing, ThreadPoolManager, and the LoggingThread.
     private void startThreads(){
+        log = new ServerLogger();
+        java.lang.Thread logger = new java.lang.Thread(log);
+        logger.start();
+
         threadPoolManager = new ThreadPoolManager();
         java.lang.Thread tpManager = new java.lang.Thread(threadPoolManager);
         tpManager.start();
@@ -135,15 +141,34 @@ public class Server {
             throw new IOException("AcceptKey: " + e);
         }
 
+        log.setClients(selector.keys());
         System.out.println("Accepting incoming connection.");
     }
 
 
     //Creates and adds read task to the task queue in the ThreadPoolManager.
     private void createReadTask(SelectionKey key){
+        if(key.attachment() == null){
+            key.attach(new Statistics());
+        }
+
+        //Take care of key statistics, this keeps track of whether or not a key is in use.
+        synchronized(key) {
+            Statistics stats = (Statistics) key.attachment();
+            if (!stats.isBusy()) {
+                stats.makeBusy();
+            }
+            else{   //If the key is busy, just return.
+                return;
+            }
+        }
+
         //Adding a read task to the queue managed in the ThreadPoolManager thread.
         Task readTask = new Task(key);
         threadPoolManager.addToTaskQueue(readTask);
+
+        //Inform log the server has sent another message
+        log.incrementTotalSent();
     }
 
 

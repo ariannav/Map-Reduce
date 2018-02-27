@@ -26,7 +26,6 @@ public class Thread implements Runnable{
         }catch(InterruptedException e){}
 
         task.run();
-        manager.log.incrementTotalReceived();
     }
 
 
