@@ -1,3 +1,9 @@
+//Author: Arianna Vacca
+//Purpose: CS455 P2
+/*Class Description: Server statistics printer class. Prints server output
+(server throughput, number of active client connections, average client
+throughput, standard deviation of the per-client throughput) every 20 seconds.*/
+
 package cs455.scaling.server;
 
 import java.lang.Thread;
@@ -10,11 +16,14 @@ public class ServerLogger implements Runnable{
     private int totalSent;
     public Set<SelectionKey> clients;
 
+    //Constructor
     public ServerLogger(){
         totalSent = 0;
         clients = null;
     }
 
+    //Prints server throughput, number of client connections, mean client
+    //throughput, and std. deviation of client throughput every 20 seconds.
     public void run(){
         while(true){
             synchronized(this){
@@ -47,7 +56,7 @@ public class ServerLogger implements Runnable{
         return clients.size()-1;
     }
 
-
+    //Calculate mean throughput
     private double getMeanThroughput(){
         if(clients == null){
             return 0;
@@ -69,6 +78,7 @@ public class ServerLogger implements Runnable{
     }
 
 
+    //Calculte std. deviation.
     private double getStdDeviation(){
         if(clients == null){
             return 0;
@@ -93,6 +103,7 @@ public class ServerLogger implements Runnable{
     }
 
 
+    //Resets all counters
     private void resetClientCounters(){
         if(clients == null){
             return;
@@ -110,12 +121,15 @@ public class ServerLogger implements Runnable{
         }
     }
 
+    //Below is used outside of the synchronized block.
 
+    //Gets a set of all the clients the selector is connected to.
     public synchronized void setClients(Set<SelectionKey> clients){
         this.clients = clients;
     }
 
 
+    //Increments the number of messages that the server has sent.
     public synchronized void incrementTotalSent(){
         totalSent++;
     }

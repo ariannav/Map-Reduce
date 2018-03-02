@@ -1,3 +1,9 @@
+//Author: Arianna Vacca
+//Purpose: CS455 P2
+/*Class Description: A task object contains a run() method. This run() method is
+run by the thread that is assigned to this task. Each task is created using a
+key, which is used to read and write to the socket the client is connected to.*/
+
 package cs455.scaling.server;
 
 import java.io.IOException;
@@ -51,6 +57,7 @@ public class Task implements Runnable{
                 return;
             }
 
+            //Flips the buffer to later be read from.
             buffer.flip();
             key.interestOps(SelectionKey.OP_WRITE);
         }
@@ -65,7 +72,8 @@ public class Task implements Runnable{
     //Converts the message to SHA1.
     private String SHA1FromBytes() throws NoSuchAlgorithmException{
         try{
-            //Taking the bytes in the ByteBuffer and converts them to SHA1 hash, returns the created string.
+            //Taking the bytes in the ByteBuffer and converts them to SHA1 hash,
+            //then returns the created string.
             MessageDigest digest = MessageDigest.getInstance("SHA1");
             byte[] hash = digest.digest(buffer.array());
             BigInteger hashInt = new BigInteger(1, hash);
@@ -90,6 +98,7 @@ public class Task implements Runnable{
             channel.write(length);
             channel.write(ByteBuffer.wrap(returnMessage.getBytes()));
 
+            //Sets the key back to available using its attached Statistics object. 
             synchronized(key){
                 key.interestOps(SelectionKey.OP_READ);
                 Statistics keyStats = (Statistics) key.attachment();

@@ -1,3 +1,10 @@
+//Author: Arianna Vacca
+//Purpose: CS455 P2
+/*Class Description: Primary server class. Starts the Server selector, the
+server statistics printer, the thread pool manager, and the worker threads.
+Processes incoming connections and creates tasks for worker threads as
+necessary.*/
+
 package cs455.scaling.server;
 
 import java.io.IOException;
@@ -81,14 +88,17 @@ public class Server {
 
     //Starts the threads for the message processing, ThreadPoolManager, and the LoggingThread.
     private void startThreads(){
+        //Server statistics printer
         log = new ServerLogger();
         java.lang.Thread logger = new java.lang.Thread(log);
         logger.start();
 
+        //Thread pool manager
         threadPoolManager = new ThreadPoolManager();
         java.lang.Thread tpManager = new java.lang.Thread(threadPoolManager);
         tpManager.start();
 
+        //Worker threads
         for(int i = 0; i < numThreads; i++){
             java.lang.Thread workerThread = new java.lang.Thread(new Thread(threadPoolManager));
             workerThread.start();
@@ -167,7 +177,7 @@ public class Server {
         Task readTask = new Task(key);
         threadPoolManager.addToTaskQueue(readTask);
 
-        //Inform log the server has sent another message
+        //Inform log the server has sent another message.
         log.incrementTotalSent();
     }
 

@@ -1,3 +1,8 @@
+//Author: Arianna Vacca
+//Purpose: CS455 P2
+/*Class Description: Primary client class, starts the writing thread, client
+selector, and the client statistics printer.*/
+
 package cs455.scaling.client;
 
 import java.io.IOException;

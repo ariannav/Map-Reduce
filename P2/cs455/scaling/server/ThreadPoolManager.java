@@ -1,3 +1,10 @@
+//Author: Arianna Vacca
+//Purpose: CS455 P2
+/*Class Description: The ThreadPoolManager contains two wait/notify FIFO queues
+implemented using synchronized LinkedLists. One list contains tasks waiting to
+be run, the other contains ready threads. The TPM delegates tasks to available
+threads.*/
+
 package cs455.scaling.server;
 
 import java.util.Collections;
@@ -19,6 +26,8 @@ public class ThreadPoolManager implements Runnable{
     //Always waits for a ready task, then sends it to a ready thread.
     public void run(){
 
+        //Grabs a task, grabs a ready thread, then asks the selected thread to
+        //complete the task. 
         while(true){
             Task nextTask = getNextTask();
             Thread nextThread = getNextThread();
