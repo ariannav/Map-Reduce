@@ -142,7 +142,7 @@ public class Server {
         }
 
         log.setClients(selector.keys());
-        System.out.println("Accepting incoming connection.");
+        //System.out.println("Accepting incoming connection.");
     }
 
 

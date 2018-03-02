@@ -171,6 +171,12 @@ public class Client implements Runnable{
                 read = channel.read(buffer);
             }
 
+            if(read == -1){
+                channel.close();
+                key.cancel();
+                return;
+            }
+
             buffer.rewind();
             int length = buffer.getInt();
 
@@ -206,7 +212,6 @@ public class Client implements Runnable{
             throw new IOException("Read: " + e);
         }
 
-        buffer.flip();
         key.interestOps(SelectionKey.OP_WRITE);
     }
 }
