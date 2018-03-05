@@ -1,6 +1,6 @@
 CLASSES=/s/bach/m/under/arivacca/IdeaProjects/455/P2
 SCRIPT="cd $CLASSES;
-java -cp . cs455.scaling.client.Client pierre 7014 5"
+java -cp . cs455.scaling.client.Client saint-paul 7014 5"
 #$1 is the command-line argument
 for ((j=1; j<=$1; j++));
 do
