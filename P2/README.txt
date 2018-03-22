@@ -52,5 +52,3 @@ CLASS DESCRIPTIONS
 ASSUMPTIONS
 ===================
 - No clients will be terminated while the Server process is running.
-- Code has been confirmed to work with as many as 200 clients running
-  concurrently. 
