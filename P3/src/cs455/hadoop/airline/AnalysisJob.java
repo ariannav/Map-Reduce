@@ -23,7 +23,8 @@ public class AnalysisJob {
             job.setMapperClass(AnalysisMapper.class);
             //job.setCombinerClass(AnalysisReducer.class);
             job.setReducerClass(AnalysisReducer.class);
-            job.setMapOutputKeyClass(IntWritable.class);
+            //Map output class types. 
+            job.setMapOutputKeyClass(Text.class);
             job.setMapOutputValueClass(IntWritable.class);
 
             //Input & output file path provided in arguments.

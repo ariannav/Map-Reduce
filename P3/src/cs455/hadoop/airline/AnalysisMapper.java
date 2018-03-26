@@ -10,7 +10,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
-public class AnalysisMapper extends Mapper<LongWritable, Text, IntWritable, IntWritable> {
+public class AnalysisMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
 
     //Line by line parses the file and grabs the appropriate values. Outputs (departure time, delay).
     @Override
@@ -18,21 +18,28 @@ public class AnalysisMapper extends Mapper<LongWritable, Text, IntWritable, IntW
         //Split the line by separating with each comma.
         String[] values = value.toString().split(",");
 
-        IntWritable depart = new IntWritable();
+        Text departHour = new Text();
+        Text departDay = new Text();
+        Text departMonth = new Text();
         IntWritable delay = new IntWritable();
 
         //If the input is of the correct format.
         try{
             if(values.length == 29){
                 //Set the departure and the delay.
-                depart.set((Integer.parseInt(values[5])/100)%24);
+                departHour.set("h:" + (Integer.parseInt(values[5])/100)%24);
+                departDay.set("d:" + values[3]);
+                departMonth.set("m:" + values[1]);
                 delay.set(Integer.parseInt(values[14]));
             }
         }
         catch(Exception e){
             //This was the first line of the file. Pass it.
+            return; 
         }
         //Write the key: departure, and the value: delay.
-        context.write(depart, delay);
+        context.write(departHour, delay);
+        context.write(departDay, delay);
+        context.write(departMonth, delay);
     }
 }
