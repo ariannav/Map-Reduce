@@ -16,6 +16,12 @@ public class AnalysisReducer extends Reducer<Text, IntWritable, Text, IntWritabl
     int minHourDelay = Integer.MAX_VALUE;
     int minDayDelay = Integer.MAX_VALUE;
     int minMonthDelay = Integer.MAX_VALUE;
+    Text maxHour = new Text();
+    Text maxDay = new Text();
+    Text maxMonth = new Text();
+    int maxHourDelay = Integer.MIN_VALUE;
+    int maxDayDelay = Integer.MIN_VALUE;
+    int maxMonthDelay = Integer.MIN_VALUE;
 
     @Override
     protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
@@ -28,35 +34,69 @@ public class AnalysisReducer extends Reducer<Text, IntWritable, Text, IntWritabl
         }
 
         int avgDelay = sum/count;
-
         String type = (key.toString().split(":"))[0];
 
-        switch(type.charAt(0)){
+        checkMin(type.charAt(0), avgDelay, key);
+        checkMax(type.charAt(0), avgDelay, key);
+    }
+
+    @Override
+    protected void cleanup(Context context) throws IOException, InterruptedException{
+        //Writing Min Values
+        context.write(minHour, new IntWritable(minHourDelay));
+        context.write(minDay, new IntWritable(minDayDelay));
+        context.write(minMonth, new IntWritable(minMonthDelay));
+
+        //Writing Max
+        context.write(maxHour, new IntWritable(maxHourDelay));
+        context.write(maxDay, new IntWritable(maxDayDelay));
+        context.write(maxMonth, new IntWritable(maxMonthDelay));
+    }
+
+    //Determines if the current average is less than the minimum.
+    private void checkMin(char type, int avgDelay, Text key){
+        switch(type){
             case 'h': //departHour
                 if(avgDelay < minHourDelay){
                     minHourDelay = avgDelay;
-                    minHour.set(key);
+                    minHour.set("Best " + key);
                 }
                 break;
             case 'd': //departDay
                 if(avgDelay < minDayDelay){
                     minDayDelay = avgDelay;
-                    minDay.set(key);
+                    minDay.set("Best " + key);
                 }
                 break;
             case 'm': //departMonth
                 if(avgDelay < minMonthDelay){
                     minMonthDelay = avgDelay;
-                    minMonth.set(key);
+                    minMonth.set("Best " + key);
                 }
                 break;
         }
     }
 
-    @Override
-    protected void cleanup(Context context) throws IOException, InterruptedException{
-        context.write(minHour, new IntWritable(minHourDelay));
-        context.write(minDay, new IntWritable(minDayDelay));
-        context.write(minMonth, new IntWritable(minMonthDelay));
+    private void checkMax(char type, int avgDelay, Text key){
+        switch(type){
+            case 'h': //departHour
+                if(avgDelay > maxHourDelay){
+                    maxHourDelay = avgDelay;
+                    maxHour.set("Worst " + key);
+                }
+                break;
+            case 'd': //departDay
+                if(avgDelay > maxDayDelay){
+                    maxDayDelay = avgDelay;
+                    maxDay.set("Worst " + key);
+                }
+                break;
+            case 'm': //departMonth
+                if(avgDelay > maxMonthDelay){
+                    maxMonthDelay = avgDelay;
+                    maxMonth.set("Worst " + key);
+                }
+                break;
+        }
     }
 }

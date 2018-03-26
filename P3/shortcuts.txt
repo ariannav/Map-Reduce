@@ -20,8 +20,8 @@ $HADOOP_HOME/bin/hdfs dfs -ls /cs455/census (where the output will be)
 
 Re-Run
 ant
-$HADOOP_HOME/bin/hdfs dfs -rmdir /cs455/census/output
-$HADOOP_HOME/bin/hadoop jar airline.jar cs455.hadoop.airline.AnalysisJob /data/main /home/census/output
+$HADOOP_HOME/bin/hdfs dfs -rm -r /home/census/output
+$HADOOP_HOME/bin/hadoop jar dist/airline.jar cs455.hadoop.airline.AnalysisJob /data/main /home/census/output
 
 
 
