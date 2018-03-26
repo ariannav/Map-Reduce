@@ -21,9 +21,9 @@ public class AnalysisJob {
             Job job = Job.getInstance(conf, "Flight Analysis");
             job.setJarByClass(AnalysisJob.class);
             job.setMapperClass(AnalysisMapper.class);
-            job.setCombinerClass(AnalysisReducer.class);
+            //job.setCombinerClass(AnalysisReducer.class);
             job.setReducerClass(AnalysisReducer.class);
-            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputKeyClass(IntWritable.class);
             job.setMapOutputValueClass(IntWritable.class);
 
             //Input & output file path provided in arguments.

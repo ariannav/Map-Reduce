@@ -1,0 +1,27 @@
+Run HDFS and Yarn
+$HADOOP_HOME/sbin/start-dfs.sh
+$HADOOP_HOME/sbin/start-yarn.sh
+
+Stop HDFS and Yarn
+$HADOOP_HOME/sbin/stop-dfs.sh
+$HADOOP_HOME/sbin/stop-yarn.sh
+
+Website to access websites in CSU
+https://secure.colostate.edu
+Browse
+http://santa-fe.cs.colostate.edu:48801
+
+Environment variable 
+export HADOOP_CONF_DIR=/s/bach/m/under/arivacca/client-config/client-config
+
+Commands 
+$HADOOP_HOME/bin/hdfs dfs -ls /cs455/census (where the output will be) 
+
+
+Re-Run
+ant
+$HADOOP_HOME/bin/hdfs dfs -rmdir /cs455/census/output
+$HADOOP_HOME/bin/hadoop jar airline.jar cs455.hadoop.airline.AnalysisJob /data/main /home/census/output
+
+
+
