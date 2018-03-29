@@ -10,18 +10,18 @@ import java.io.IOException;
 
 public class AnalysisReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 
-    Text minHour = new Text();
-    Text minDay = new Text();
-    Text minMonth = new Text();
-    int minHourDelay = Integer.MAX_VALUE;
-    int minDayDelay = Integer.MAX_VALUE;
-    int minMonthDelay = Integer.MAX_VALUE;
-    Text maxHour = new Text();
-    Text maxDay = new Text();
-    Text maxMonth = new Text();
-    int maxHourDelay = Integer.MIN_VALUE;
-    int maxDayDelay = Integer.MIN_VALUE;
-    int maxMonthDelay = Integer.MIN_VALUE;
+    private Text minHour = new Text();
+    private Text minDay = new Text();
+    private Text minMonth = new Text();
+    private int minHourDelay = Integer.MAX_VALUE;
+    private int minDayDelay = Integer.MAX_VALUE;
+    private int minMonthDelay = Integer.MAX_VALUE;
+    private Text maxHour = new Text();
+    private Text maxDay = new Text();
+    private Text maxMonth = new Text();
+    private int maxHourDelay = Integer.MIN_VALUE;
+    private int maxDayDelay = Integer.MIN_VALUE;
+    private int maxMonthDelay = Integer.MIN_VALUE;
 
     @Override
     protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {

@@ -6,11 +6,9 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-
 import java.io.IOException;
-import java.util.StringTokenizer;
 
-public class AnalysisMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+public class Q3AnalysisMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
 
     //Line by line parses the file and grabs the appropriate values. Outputs (departure time, delay).
     @Override
@@ -18,28 +16,27 @@ public class AnalysisMapper extends Mapper<LongWritable, Text, Text, IntWritable
         //Split the line by separating with each comma.
         String[] values = value.toString().split(",");
 
-        Text departHour = new Text();
-        Text departDay = new Text();
-        Text departMonth = new Text();
-        IntWritable delay = new IntWritable();
+        Text yearOriginAirportCode = new Text();
+        Text yearDestinationAirportCode = new Text();
+        Text overallOriginAirportCode = new Text();
+        Text overallDestinationAirportCode = new Text();
 
         //If the input is of the correct format.
-        try{
-            if(values.length == 29){
-                //Set the departure and the delay.
-                departHour.set("h:" + (Integer.parseInt(values[5])/100)%24);
-                departDay.set("d:" + values[3]);
-                departMonth.set("m:" + values[1]);
-                delay.set(Integer.parseInt(values[14]));
+        if(values.length == 29){
+            if(values[16].equals("Origin")){
+                //First line in a File, do not want to include.
+                return;
             }
+                yearOriginAirportCode.set(values[0] + ":" + values[16]);
+                yearDestinationAirportCode.set(values[0] + ":" + values[17]);
+                overallOriginAirportCode.set("overall:" + values[16]);
+                overallDestinationAirportCode.set("overall:" + values[17]);
         }
-        catch(Exception e){
-            //This was the first line of the file. Pass it.
-            return;
-        }
+
         //Write the key: departure, and the value: delay.
-        context.write(departHour, delay);
-        context.write(departDay, delay);
-        context.write(departMonth, delay);
+        context.write(yearOriginAirportCode, new IntWritable(1));
+        context.write(yearDestinationAirportCode, new IntWritable(1));
+        context.write(overallOriginAirportCode, new IntWritable(1));
+        context.write(overallDestinationAirportCode, new IntWritable(1));
     }
 }

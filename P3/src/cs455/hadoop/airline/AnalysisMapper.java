@@ -6,9 +6,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-
 import java.io.IOException;
-import java.util.StringTokenizer;
 
 public class AnalysisMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
 
@@ -35,7 +33,7 @@ public class AnalysisMapper extends Mapper<LongWritable, Text, Text, IntWritable
         }
         catch(Exception e){
             //This was the first line of the file. Pass it.
-            return; 
+            return;
         }
         //Write the key: departure, and the value: delay.
         context.write(departHour, delay);
