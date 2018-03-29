@@ -38,6 +38,7 @@ public class Q3AnalysisJob {
             Job job2 = Job.getInstance(conf, "Flight Analysis Q3: Finding Top 10");
             job2.setJarByClass(Q3AnalysisJob.class);
             job2.setMapperClass(Q3TopTenMapper.class);
+            job2.setSortComparatorClass(SortIntComparator.class);
             job2.setReducerClass(Q3TopTenReducer.class);
             //Map output class types.
             job2.setMapOutputKeyClass(IntWritable.class);
@@ -60,4 +61,5 @@ public class Q3AnalysisJob {
             System.err.println(e.getMessage());
         }
     }
+
 }
