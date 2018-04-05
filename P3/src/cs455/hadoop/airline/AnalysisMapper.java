@@ -8,7 +8,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import java.io.IOException;
 
-public class AnalysisMapper extends Mapper<LongWritable, Text, Text, IntWritable> {
+public class AnalysisMapper extends Mapper<LongWritable, Text, Text, Text> {
 
     //Line by line parses the file and grabs the appropriate values. Outputs (departure time, delay).
     @Override
@@ -16,28 +16,39 @@ public class AnalysisMapper extends Mapper<LongWritable, Text, Text, IntWritable
         //Split the line by separating with each comma.
         String[] values = value.toString().split(",");
 
-        Text departHour = new Text();
-        Text departDay = new Text();
-        Text departMonth = new Text();
-        IntWritable delay = new IntWritable();
 
         //If the input is of the correct format.
+        //Year:0, month:1, day of week:2, hour:3
+        //tail num:4, arrival delay:5, origin:6,
+        //dest:7, weather delay:8, carrierName:9.
+
+
         try{
-            if(values.length == 29){
-                //Set the departure and the delay.
-                departHour.set("h:" + (Integer.parseInt(values[5])/100)%24);
-                departDay.set("d:" + values[3]);
-                departMonth.set("m:" + values[1]);
-                delay.set(Integer.parseInt(values[14]));
-            }
+            //Hour, day, month for Q1 and Q2. Grab delay for these dates.
+            Text departHour = new Text("h:" + (Integer.parseInt(values[3])/100)%24);
+            Text departDay = new Text("d:" + values[2]);
+            Text departMonth = new Text("m:" + values[1]);
+            Text delay = new Text(values[5] + ":1");
+
+            Text yearOriginAirportCode = new Text("y:" + values[0] + ":" + values[6]);
+            Text yearDestinationAirportCode = new Text("y:" + values[0] + ":" + values[7]);
+            Text overallOriginAirportCode = new Text("overall:" + values[6]);
+            Text overallDestinationAirportCode = new Text("overall:" + values[7]);
+
+            //Write the key: departure, and the value: delay.
+            context.write(departHour, delay);
+            context.write(departDay, delay);
+            context.write(departMonth, delay);
+
+            //Write the output for Q3. 
+            context.write(yearOriginAirportCode, new Text("1"));
+            context.write(yearDestinationAirportCode, new Text("1"));
+            context.write(overallOriginAirportCode, new Text("1"));
+            context.write(overallDestinationAirportCode, new Text("1"));
         }
         catch(Exception e){
-            //This was the first line of the file. Pass it.
+            //Incorrectly formatted incoming data, pass it so it is not included.
             return;
         }
-        //Write the key: departure, and the value: delay.
-        context.write(departHour, delay);
-        context.write(departDay, delay);
-        context.write(departMonth, delay);
     }
 }

@@ -5,11 +5,13 @@ package cs455.hadoop.airline;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
 import java.io.IOException;
 
-public class AnalysisReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+public class AnalysisReducer extends Reducer<Text, Text, Text, IntWritable> {
 
+    private MultipleOutputs mos;
     private Text minHour = new Text();
     private Text minDay = new Text();
     private Text minMonth = new Text();
@@ -24,33 +26,60 @@ public class AnalysisReducer extends Reducer<Text, IntWritable, Text, IntWritabl
     private int maxMonthDelay = Integer.MIN_VALUE;
 
     @Override
-    protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+    protected void setup(Context context){
+        mos = new MultipleOutputs(context);
+    }
+
+    @Override
+    protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
         int count = 0;
         int sum = 0;
-        // calculate the total count
-        for(IntWritable val : values){
-            count++;
-            sum += val.get();
+        String[] partition;
+        String[] keyType = key.toString().split(":");
+
+        //Q1 and Q2 Mapping results.
+        if(keyType[0].equals("h") || keyType[0].equals("d") || keyType[0].equals("m")){
+            for(Text val : values){
+                try{
+                    partition = val.toString().split(":");
+                    sum += Integer.parseInt(partition[0]);
+                    count += Integer.parseInt(partition[1]);
+                }
+                catch(Exception e){
+                    //Came across an "NA". That's okay, we can just skip it.
+                }
+            }
+
+            int avgDelay = sum/count;
+            String type = (key.toString().split(":"))[0];
+
+            checkMin(type.charAt(0), avgDelay, key);
+            checkMax(type.charAt(0), avgDelay, key);
         }
+        //Filter Q3 mapping results.
+        else if(keyType[0].equals("y") || keyType[0].equals("overall")){
+            // calculate the total count
+            for(Text val : values){
+                count+= Integer.parseInt(val.toString());
+            }
 
-        int avgDelay = sum/count;
-        String type = (key.toString().split(":"))[0];
-
-        checkMin(type.charAt(0), avgDelay, key);
-        checkMax(type.charAt(0), avgDelay, key);
+            mos.write("q3", key, new IntWritable(count));
+        }
     }
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException{
         //Writing Min Values
-        context.write(minHour, new IntWritable(minHourDelay));
-        context.write(minDay, new IntWritable(minDayDelay));
-        context.write(minMonth, new IntWritable(minMonthDelay));
+        mos.write("q1a2", minHour, new IntWritable(minHourDelay));
+        mos.write("q1a2", minDay, new IntWritable(minDayDelay));
+        mos.write("q1a2", minMonth, new IntWritable(minMonthDelay));
 
         //Writing Max
-        context.write(maxHour, new IntWritable(maxHourDelay));
-        context.write(maxDay, new IntWritable(maxDayDelay));
-        context.write(maxMonth, new IntWritable(maxMonthDelay));
+        mos.write("q1a2", maxHour, new IntWritable(maxHourDelay));
+        mos.write("q1a2", maxDay, new IntWritable(maxDayDelay));
+        mos.write("q1a2", maxMonth, new IntWritable(maxMonthDelay));
+
+        mos.close();
     }
 
     //Determines if the current average is less than the minimum.

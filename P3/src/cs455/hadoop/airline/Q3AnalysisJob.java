@@ -29,7 +29,7 @@ public class Q3AnalysisJob {
             job.setMapOutputValueClass(IntWritable.class);
 
             //Input & output file path provided in arguments.
-            FileInputFormat.addInputPath(job, new Path(args[0]));
+            FileInputFormat.addInputPath(job, new Path(args[1] + "/data"));
             FileOutputFormat.setOutputPath(job, new Path(args[1] + "/Q3"));
 
             //Wait for job to complete.

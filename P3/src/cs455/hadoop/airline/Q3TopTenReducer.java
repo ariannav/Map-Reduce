@@ -19,10 +19,10 @@ public class Q3TopTenReducer extends Reducer<IntWritable, Text, Text, IntWritabl
         for(Text val : values){
             info = val.toString().split(":");
             try{
-                int year = Integer.parseInt(info[0]);
+                int year = Integer.parseInt(info[1]);
                 int index = year - 1987;
                 if(topTen[index] < 10){
-                    context.write(val, key);
+                    context.write(new Text(info[1] + ":" + info[2]), key);
                     topTen[index]++;
                 }
             }
