@@ -5,7 +5,6 @@ package cs455.hadoop.airline;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
-
 import java.io.IOException;
 
 public class AnalysisCombiner extends Reducer<Text, Text, Text, Text> {
@@ -41,6 +40,20 @@ public class AnalysisCombiner extends Reducer<Text, Text, Text, Text> {
 
             String countValue = Integer.toString(count);
             context.write(key, new Text(countValue));
+        }
+        //Filter Q4 mapping results.
+        else if(keyType[0].equals("c")){
+            String[] valSec;
+
+            //Calculate the total sum of delay and flights
+            for(Text val : values){
+                valSec = val.toString().split(":");
+
+                //Delay sum, flight count
+                sum += Integer.parseInt(valSec[0]);
+                count+= Integer.parseInt(valSec[1]);
+            }
+            context.write(key, new Text(sum + ":" + count));
         }
     }
 }

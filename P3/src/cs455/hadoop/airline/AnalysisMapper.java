@@ -16,35 +16,48 @@ public class AnalysisMapper extends Mapper<LongWritable, Text, Text, Text> {
         //Split the line by separating with each comma.
         String[] values = value.toString().split(",");
 
-
-        //If the input is of the correct format.
-        //Year:0, month:1, day of week:2, hour:3
-        //tail num:4, arrival delay:5, origin:6,
-        //dest:7, weather delay:8, carrierName:9.
-
+        if(values[0].equals("Year")){
+            return; //Skip this line, it is the first line of the file.
+        }
 
         try{
             //Hour, day, month for Q1 and Q2. Grab delay for these dates.
-            Text departHour = new Text("h:" + (Integer.parseInt(values[3])/100)%24);
-            Text departDay = new Text("d:" + values[2]);
+            Text departHour = new Text("h:" + (Integer.parseInt(values[4])/100)%24);
+            Text departDay = new Text("d:" + values[3]);
             Text departMonth = new Text("m:" + values[1]);
-            Text delay = new Text(values[5] + ":1");
+            Text delay = new Text(values[14] + ":1");
 
-            Text yearOriginAirportCode = new Text("y:" + values[0] + ":" + values[6]);
-            Text yearDestinationAirportCode = new Text("y:" + values[0] + ":" + values[7]);
-            Text overallOriginAirportCode = new Text("overall:" + values[6]);
-            Text overallDestinationAirportCode = new Text("overall:" + values[7]);
+            //Q3
+            Text yearOriginAirportCode = new Text("y:" + values[0] + ":" + values[16]);
+            Text yearDestinationAirportCode = new Text("y:" + values[0] + ":" + values[17]);
+            Text overallOriginAirportCode = new Text("overall:" + values[16]);
+            Text overallDestinationAirportCode = new Text("overall:" + values[17]);
+
+            //Q4
+            Text carrierCode = new Text("c:" + values[8]);
+            Text carrierDelayMinNum = new Text();
+
+            //Only accounting for positive delays.
+            if(Integer.parseInt(values[14]) >= 0){
+                carrierDelayMinNum.set(values[14] + ":1");
+            }
+            else{
+                carrierDelayMinNum.set("0:0");
+            }
 
             //Write the key: departure, and the value: delay.
             context.write(departHour, delay);
             context.write(departDay, delay);
             context.write(departMonth, delay);
 
-            //Write the output for Q3. 
+            //Write the output for Q3.
             context.write(yearOriginAirportCode, new Text("1"));
             context.write(yearDestinationAirportCode, new Text("1"));
             context.write(overallOriginAirportCode, new Text("1"));
             context.write(overallDestinationAirportCode, new Text("1"));
+
+            //Write output for Q4.
+            context.write(carrierCode, carrierDelayMinNum);
         }
         catch(Exception e){
             //Incorrectly formatted incoming data, pass it so it is not included.

@@ -6,6 +6,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
+import java.util.ArrayList;
 
 import java.io.IOException;
 
@@ -24,6 +25,7 @@ public class AnalysisReducer extends Reducer<Text, Text, Text, IntWritable> {
     private int maxHourDelay = Integer.MIN_VALUE;
     private int maxDayDelay = Integer.MIN_VALUE;
     private int maxMonthDelay = Integer.MIN_VALUE;
+    private ArrayList<String> carriers = new ArrayList<>(30);
 
     @Override
     protected void setup(Context context){
@@ -64,6 +66,20 @@ public class AnalysisReducer extends Reducer<Text, Text, Text, IntWritable> {
             }
 
             mos.write("q3", key, new IntWritable(count));
+        }
+        //Filter Q4 mapping results.
+        else if(keyType[0].equals("c")){
+            String[] valSec;
+
+            //Calculate the total sum of delay and flights
+            for(Text val : values){
+                valSec = val.toString().split(":");
+                //Delay sum, flight count
+                sum += Integer.parseInt(valSec[0]);
+                count+= Integer.parseInt(valSec[1]);
+            }
+
+            mos.write("q4", key, new Text(sum + ":" + count + ":avg " + sum/count));
         }
     }
 
