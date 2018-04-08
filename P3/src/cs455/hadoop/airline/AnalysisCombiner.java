@@ -6,6 +6,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class AnalysisCombiner extends Reducer<Text, Text, Text, Text> {
 
@@ -54,6 +55,26 @@ public class AnalysisCombiner extends Reducer<Text, Text, Text, Text> {
                 count+= Integer.parseInt(valSec[1]);
             }
             context.write(key, new Text(sum + ":" + count));
+        }
+        //Filter Q5 mapping results.
+        else if(keyType[0].equals("n")){
+            int[] yearCount = new int[44];
+            //Accumulate delay and flights
+            for(Text val: values){
+                String withoutBrackets = val.toString().substring(1, val.toString().length()-1);
+                partition = withoutBrackets.split(",");
+
+                for(int i = 0 ; i < partition.length; i++){
+                    try{
+                        yearCount[i] += Integer.parseInt(partition[i]);
+                    }
+                    catch(Exception e){
+                        yearCount[i] += Integer.parseInt(partition[i].substring(1));
+                    }
+                }
+            }
+            //output, (tailnum, year), (sum, count)
+            context.write(key, new Text(Arrays.toString(yearCount)));
         }
     }
 }

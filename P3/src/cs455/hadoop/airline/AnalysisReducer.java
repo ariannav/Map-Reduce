@@ -7,25 +7,13 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import java.io.IOException;
 
 public class AnalysisReducer extends Reducer<Text, Text, Text, IntWritable> {
 
     private MultipleOutputs mos;
-    private Text minHour = new Text();
-    private Text minDay = new Text();
-    private Text minMonth = new Text();
-    private int minHourDelay = Integer.MAX_VALUE;
-    private int minDayDelay = Integer.MAX_VALUE;
-    private int minMonthDelay = Integer.MAX_VALUE;
-    private Text maxHour = new Text();
-    private Text maxDay = new Text();
-    private Text maxMonth = new Text();
-    private int maxHourDelay = Integer.MIN_VALUE;
-    private int maxDayDelay = Integer.MIN_VALUE;
-    private int maxMonthDelay = Integer.MIN_VALUE;
-    private ArrayList<String> carriers = new ArrayList<>(30);
 
     @Override
     protected void setup(Context context){
@@ -53,10 +41,7 @@ public class AnalysisReducer extends Reducer<Text, Text, Text, IntWritable> {
             }
 
             int avgDelay = sum/count;
-            String type = (key.toString().split(":"))[0];
-
-            checkMin(type.charAt(0), avgDelay, key);
-            checkMax(type.charAt(0), avgDelay, key);
+            mos.write("q1a2", key, new IntWritable(avgDelay));
         }
         //Filter Q3 mapping results.
         else if(keyType[0].equals("y") || keyType[0].equals("overall")){
@@ -81,67 +66,36 @@ public class AnalysisReducer extends Reducer<Text, Text, Text, IntWritable> {
 
             mos.write("q4", key, new Text(sum + ":" + count + ":avg " + sum/count));
         }
+        //Filter Q5 mapping results.
+        else if(keyType[0].equals("n")){
+            int[] yearCount = new int[44];
+            //Accumulate delay and flights
+            for(Text val: values){
+                try{
+                    String withoutBrackets = val.toString().substring(1, val.toString().length()-1);
+                    partition = withoutBrackets.split(",");
+
+                    for(int i = 0 ; i < partition.length; i++){
+                        try{
+                            yearCount[i] += Integer.parseInt(partition[i]);
+                        }
+                        catch(Exception e){
+                            yearCount[i] += Integer.parseInt(partition[i].substring(1));
+                        }
+                    }
+                }
+                catch(Exception e){
+                    //Came across an "NA". That's okay, we can just skip it.
+                }
+            }
+            //output, (tailnum, year), (sum, count)
+            mos.write("q5", key, new Text(Arrays.toString(yearCount)));
+        }
     }
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException{
-        //Writing Min Values
-        mos.write("q1a2", minHour, new IntWritable(minHourDelay));
-        mos.write("q1a2", minDay, new IntWritable(minDayDelay));
-        mos.write("q1a2", minMonth, new IntWritable(minMonthDelay));
-
-        //Writing Max
-        mos.write("q1a2", maxHour, new IntWritable(maxHourDelay));
-        mos.write("q1a2", maxDay, new IntWritable(maxDayDelay));
-        mos.write("q1a2", maxMonth, new IntWritable(maxMonthDelay));
-
         mos.close();
     }
 
-    //Determines if the current average is less than the minimum.
-    private void checkMin(char type, int avgDelay, Text key){
-        switch(type){
-            case 'h': //departHour
-                if(avgDelay < minHourDelay){
-                    minHourDelay = avgDelay;
-                    minHour.set("Best " + key);
-                }
-                break;
-            case 'd': //departDay
-                if(avgDelay < minDayDelay){
-                    minDayDelay = avgDelay;
-                    minDay.set("Best " + key);
-                }
-                break;
-            case 'm': //departMonth
-                if(avgDelay < minMonthDelay){
-                    minMonthDelay = avgDelay;
-                    minMonth.set("Best " + key);
-                }
-                break;
-        }
-    }
-
-    private void checkMax(char type, int avgDelay, Text key){
-        switch(type){
-            case 'h': //departHour
-                if(avgDelay > maxHourDelay){
-                    maxHourDelay = avgDelay;
-                    maxHour.set("Worst " + key);
-                }
-                break;
-            case 'd': //departDay
-                if(avgDelay > maxDayDelay){
-                    maxDayDelay = avgDelay;
-                    maxDay.set("Worst " + key);
-                }
-                break;
-            case 'm': //departMonth
-                if(avgDelay > maxMonthDelay){
-                    maxMonthDelay = avgDelay;
-                    maxMonth.set("Worst " + key);
-                }
-                break;
-        }
-    }
 }

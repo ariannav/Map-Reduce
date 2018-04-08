@@ -23,9 +23,9 @@ public class AnalysisJob{
     public static void main(String[] args) {
         try {
             Configuration conf = new Configuration();
-
+            
             //Set the necessary variables for the job.
-            Job job = Job.getInstance(conf, "Flight Analysis Q1, Q2, and Q3");
+            Job job = Job.getInstance(conf, "Inital Flight Analysis");
             job.setJarByClass(AnalysisJob.class);
             job.setMapperClass(AnalysisMapper.class);
             job.setCombinerClass(AnalysisCombiner.class);
@@ -38,18 +38,21 @@ public class AnalysisJob{
             FileInputFormat.addInputPath(job, new Path(args[0]));
 
             //Output file paths
-            FileOutputFormat.setOutputPath(job, new Path(args[1] + "/Q1andQ2"));
+            FileOutputFormat.setOutputPath(job, new Path(args[1] + "/temp"));
             MultipleOutputs.addNamedOutput(job, "q1a2", TextOutputFormat.class, Text.class, IntWritable.class);
             MultipleOutputs.addNamedOutput(job, "q3", TextOutputFormat.class, Text.class, IntWritable.class);
             MultipleOutputs.addNamedOutput(job, "q4", TextOutputFormat.class, Text.class, Text.class);
+            MultipleOutputs.addNamedOutput(job, "q5", TextOutputFormat.class, Text.class, Text.class);
 
             //Wait for job to complete.
             job.waitForCompletion(true);
 
-            Job job2 = Job.getInstance(conf, "Flight Analysis Q3: Finding Top 10");
+            Job job2 = Job.getInstance(conf, "Final Flight Analysis");
             job2.setJarByClass(Q3AnalysisJob.class);
             job2.setMapperClass(Q3TopTenMapper.class);
             job2.setMapperClass(CarrierMapper.class);
+            job2.setMapperClass(Q1andQ2Mapper.class);
+            job2.setMapperClass(PlaneMapper.class);
             job2.setSortComparatorClass(SortTextComparator.class);  //Homemade class to reverse sort.
             job2.setReducerClass(Q3TopTenReducer.class);
             //Map output class types.
@@ -57,16 +60,22 @@ public class AnalysisJob{
             job2.setMapOutputValueClass(Text.class);
 
             //Input & output file path provided in arguments.
-            FileInputFormat.addInputPath(job2, new Path(args[1] + "/Q1andQ2"));
-            MultipleInputs.addInputPath(job2, new Path(args[1] + "/Q1andQ2/q3-r-00000"), TextInputFormat.class, Q3TopTenMapper.class);
+            FileInputFormat.addInputPath(job2, new Path(args[1] + "/temp"));
+            MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q1a2-r-00000"), TextInputFormat.class, Q1andQ2Mapper.class);
+            MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q3-r-00000"), TextInputFormat.class, Q3TopTenMapper.class);
             MultipleInputs.addInputPath(job2, new Path(args[0] + "/../supplementary/carriers.csv"), TextInputFormat.class, CarrierMapper.class);
-            MultipleInputs.addInputPath(job2, new Path(args[1] + "/Q1andQ2/q4-r-00000"), TextInputFormat.class, CarrierMapper.class);
+            MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q4-r-00000"), TextInputFormat.class, CarrierMapper.class);
+            MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q5-r-00000"), TextInputFormat.class, PlaneMapper.class);
+            MultipleInputs.addInputPath(job2, new Path(args[0] + "/../supplementary/plane-data.csv"), TextInputFormat.class, PlaneMapper.class);
 
-            FileOutputFormat.setOutputPath(job2, new Path(args[1] + "/Q3andQ4"));
+
+            FileOutputFormat.setOutputPath(job2, new Path(args[1] + "/final"));
+            MultipleOutputs.addNamedOutput(job2, "q1a2", TextOutputFormat.class, Text.class, Text.class);
             MultipleOutputs.addNamedOutput(job2, "q3before2000", TextOutputFormat.class, Text.class, Text.class);
             MultipleOutputs.addNamedOutput(job2, "q3before2009", TextOutputFormat.class, Text.class, Text.class);
             MultipleOutputs.addNamedOutput(job2, "q3overall", TextOutputFormat.class, Text.class, Text.class);
             MultipleOutputs.addNamedOutput(job2, "q4", TextOutputFormat.class, Text.class, Text.class);
+            MultipleOutputs.addNamedOutput(job2, "q5", TextOutputFormat.class, Text.class, Text.class);
 
             // Wait for job to complete.
             System.exit(job2.waitForCompletion(true) ? 0 : 1);
