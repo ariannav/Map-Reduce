@@ -16,8 +16,15 @@ public class Q3TopTenMapper extends Mapper<LongWritable, Text, Text, Text> {
         //Split the line by separating with each tab.
         String[] values = value.toString().split("\t");
 
-        //Write the key: Traffic (t:number), value: airport name. We want to sort by traffic. 
-        context.write(new Text("t:" + values[1]), new Text(values[0]));
+        //Q3
+        if(values[0].charAt(0) == 'y' || values[0].charAt(0) == 'o'){
+            //Write the key: Traffic (t:number), value: airport name. We want to sort by traffic.
+            context.write(new Text("t:" + values[1]), new Text(values[0]));
+        }
+        //Q7
+        else if(values[0].charAt(0) == '\"'){
+            context.write(new Text("s:" + values[1]), new Text(values[0]));
+        }
 
     }
 }

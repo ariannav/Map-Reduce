@@ -20,6 +20,11 @@ public class PlaneMapper extends Mapper<LongWritable, Text, Text, Text> {
             context.write(new Text(values[0]), new Text(values[1]));
         }
         else{
+            if(values[0].equals("tailnum")){
+                //First line of plane data file.
+                return;
+            }
+
             try{
                 context.write(new Text("n:" + values[0]), new Text(values[8]));
             }
