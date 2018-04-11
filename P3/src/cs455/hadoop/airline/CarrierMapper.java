@@ -17,6 +17,7 @@ public class CarrierMapper extends Mapper<LongWritable, Text, Text, Text> {
         //Output from last job, can print in current form.
         if(values.length == 1){
             values = value.toString().split("\t");
+            //Writes carrier code and corresponding values. 
             context.write(new Text(values[0]), new Text(values[1]));
             return;
         }

@@ -26,6 +26,7 @@ public class PlaneMapper extends Mapper<LongWritable, Text, Text, Text> {
             }
 
             try{
+                //Outputs the tailnum, and the manufactured year.
                 context.write(new Text("n:" + values[0]), new Text(values[8]));
             }
             catch(Exception e){

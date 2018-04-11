@@ -10,7 +10,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.IOException;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
-public class Q3TopTenReducer extends Reducer<Text, Text, Text, Text> {
+public class Job2Reducer extends Reducer<Text, Text, Text, Text> {
 
     private long oldCount = 0;
     private long oldSum = 0;
@@ -20,6 +20,7 @@ public class Q3TopTenReducer extends Reducer<Text, Text, Text, Text> {
     private int[] topTen = new int[23];
     private int ten = 1;
     private int ten1 = 1;
+    private int fbiTen = 1;
 
     @Override
     protected void setup(Context context){
@@ -47,11 +48,17 @@ public class Q3TopTenReducer extends Reducer<Text, Text, Text, Text> {
         else if(keyType == 'n'){
             processQ5(key, values);
         }
+        //Q6
         else if(keyType == 'w'){
             processQ6(key, values);
         }
+        //Q7
         else if(keyType == 's'){
             processQ7(key, values);
+        }
+        //Q8
+        else if(keyType == 'f'){
+            processQ7FBI(key, values);
         }
     }
 
@@ -159,6 +166,7 @@ public class Q3TopTenReducer extends Reducer<Text, Text, Text, Text> {
                 }
             }
 
+            //Accumulates count by year.
             for(int i = 0 ; i < partition.length; i++){
                 try{
                     yearCount[i] += Integer.parseInt(partition[i]);
@@ -169,6 +177,7 @@ public class Q3TopTenReducer extends Reducer<Text, Text, Text, Text> {
             }
         }
 
+        //Accumulates sum depending on whether the plane is old or new.  
         for(int i = 0; i < 22; i++){
             if(((i + 1987) - manYear) > 20){
                 oldSum += yearCount[i];
@@ -197,8 +206,19 @@ public class Q3TopTenReducer extends Reducer<Text, Text, Text, Text> {
         String[] keyType = key.toString().split(":");
         for(Text val : values){
             if(ten1 <= 10){
-                mos.write("q7", val, new Text(keyType[1]));
+                mos.write("q7", new Text("Airline Data: " + val), new Text(keyType[1]));
                 ten1++;
+            }
+        }
+    }
+
+    //Should get: s:count key, city value.
+    private void processQ7FBI(Text key, Iterable<Text> values) throws IOException, InterruptedException{
+        String[] keyType = key.toString().split(":");
+        for(Text val : values){
+            if(fbiTen <= 10){
+                mos.write("q7", new Text("FBI Crime Data:" + val), new Text(keyType[1]));
+                fbiTen++;
             }
         }
     }

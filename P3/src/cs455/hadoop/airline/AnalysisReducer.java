@@ -44,6 +44,7 @@ public class AnalysisReducer extends Reducer<Text, Text, Text, IntWritable> {
         else if(keyType  == 'w'){
             processQ6(key, values, context);
         }
+        //Filter Q7 results.
         else if(keyType == 's'){
             processQ7(key, values, context);
         }
@@ -152,11 +153,11 @@ public class AnalysisReducer extends Reducer<Text, Text, Text, IntWritable> {
                 count += Integer.parseInt(val.toString());
             }
             catch(Exception e){
-                //From airports file
+                //From airports file, set the city. 
                 city.set(val.toString());
             }
         }
-        mos.write("q7", city, new Text(Integer.toString(count))); 
+        mos.write("q7", city, new Text(Integer.toString(count)));
     }
 
     @Override

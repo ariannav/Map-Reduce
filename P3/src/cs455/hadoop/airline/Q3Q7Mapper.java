@@ -8,7 +8,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import java.io.IOException;
 
-public class Q3TopTenMapper extends Mapper<LongWritable, Text, Text, Text> {
+public class Q3Q7Mapper extends Mapper<LongWritable, Text, Text, Text> {
 
     //Grabs the output of the previous job, uses the reducer to find the top ten.
     @Override

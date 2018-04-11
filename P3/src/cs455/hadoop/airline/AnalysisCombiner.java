@@ -41,6 +41,8 @@ public class AnalysisCombiner extends Reducer<Text, Text, Text, Text> {
 
     //Q1/2: Comes in with date key, and sum:count value.
     private void processQ1aQ2(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
+        //Accumulate sum and count, pass them along as output for same key.
+        //Gets key: hour/day/month  value: sum of delayed minutes, sum of number of flights.
         int sum = 0;
         int count = 0;
 
@@ -57,13 +59,15 @@ public class AnalysisCombiner extends Reducer<Text, Text, Text, Text> {
 
         String sumCount = new String(sum + ":" + count);
         context.write(key, new Text(sumCount));
+        //Output key: hour/day/month    value: sum of delayed minutes, sum of number of flights.
     }
 
 
     //Q3: Comes in with year:airport key and 1 value.
     private void processQ3(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
+        //Accumulate count for that airport.
+        //Gets key: airport code    value: 1
         int count = 0;
-        //Calculate the total count for that carrier.
         for(Text val : values){
             count+= Integer.parseInt(val.toString());
         }
@@ -71,10 +75,13 @@ public class AnalysisCombiner extends Reducer<Text, Text, Text, Text> {
         //Convert to a string, and send it off!
         String countValue = Integer.toString(count);
         context.write(key, new Text(countValue));
+        //Writes key: airport code      value: accumulated count.
     }
 
     //Q4: Comes in with carrier code key and sum/count value.
     private void processQ4(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
+        //Accumulates sum and count for that carrier, only counts positive carrier delays.
+        //Gets key: carrier code        value: sum:count
         String[] valSec;
         int sum = 0;
         int count = 0;
@@ -87,8 +94,10 @@ public class AnalysisCombiner extends Reducer<Text, Text, Text, Text> {
             count+= Integer.parseInt(valSec[1]);
         }
         context.write(key, new Text(sum + ":" + count));
+        //Writes key: carrier code      value: accumulated sum: count of flights
     }
 
+    //TODO 
     //Q5: Comes in with tail number key, and array of delays and flight counts value.
     private void processQ5(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException{
         int[] yearCount = new int[44];
@@ -140,7 +149,7 @@ public class AnalysisCombiner extends Reducer<Text, Text, Text, Text> {
                 context.write(key, val);
             }
         }
-        context.write(key, new Text(Integer.toString(count))); 
+        context.write(key, new Text(Integer.toString(count)));
     }
 
 }

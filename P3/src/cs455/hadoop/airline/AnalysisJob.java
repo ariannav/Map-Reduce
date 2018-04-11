@@ -26,8 +26,9 @@ public class AnalysisJob{
             Configuration conf = new Configuration();
 
             //Set the necessary variables for the job.
-            Job job = Job.getInstance(conf, "Inital Flight Analysis");
+            Job job = Job.getInstance(conf, "Initial Flight Analysis");
             job.setJarByClass(AnalysisJob.class);
+            //Mapper classes
             job.setMapperClass(AnalysisMapper.class);
             job.setMapperClass(AirportMapper.class);
             job.setCombinerClass(AnalysisCombiner.class);
@@ -55,13 +56,16 @@ public class AnalysisJob{
 
             Job job2 = Job.getInstance(conf, "Final Flight Analysis");
             job2.setJarByClass(Q3AnalysisJob.class);
-            job2.setMapperClass(Q3TopTenMapper.class);
+            //Mapper classes
+            job2.setMapperClass(Q3Q7Mapper.class);
             job2.setMapperClass(CarrierMapper.class);
             job2.setMapperClass(Q1andQ2Mapper.class);
             job2.setMapperClass(PlaneMapper.class);
             job2.setMapperClass(AirportMapper.class);
+            job2.setMapperClass(FBICrimeMapper.class);
+            //Overwrote sorting class.
             job2.setSortComparatorClass(SortTextComparator.class);  //Homemade class to reverse sort.
-            job2.setReducerClass(Q3TopTenReducer.class);
+            job2.setReducerClass(Job2Reducer.class);
             //Map output class types.
             job2.setMapOutputKeyClass(Text.class);
             job2.setMapOutputValueClass(Text.class);
@@ -69,15 +73,16 @@ public class AnalysisJob{
             //Input & output file path provided in arguments.
             FileInputFormat.addInputPath(job2, new Path(args[1] + "/temp"));
             MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q1a2-r-00000"), TextInputFormat.class, Q1andQ2Mapper.class);
-            MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q3-r-00000"), TextInputFormat.class, Q3TopTenMapper.class);
+            MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q3-r-00000"), TextInputFormat.class, Q3Q7Mapper.class);
             MultipleInputs.addInputPath(job2, new Path(args[0] + "/../supplementary/carriers.csv"), TextInputFormat.class, CarrierMapper.class);
             MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q4-r-00000"), TextInputFormat.class, CarrierMapper.class);
             MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q5-r-00000"), TextInputFormat.class, PlaneMapper.class);
             MultipleInputs.addInputPath(job2, new Path(args[0] + "/../supplementary/plane-data.csv"), TextInputFormat.class, PlaneMapper.class);
             MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q6-r-00000"), TextInputFormat.class, AirportMapper.class);
-            MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q7-r-00000"), TextInputFormat.class, Q3TopTenMapper.class);
+            MultipleInputs.addInputPath(job2, new Path(args[1] + "/temp/q7-r-00000"), TextInputFormat.class, Q3Q7Mapper.class);
+            MultipleInputs.addInputPath(job2, new Path(args[1] + "/../q7CrimeData.csv"), TextInputFormat.class, FBICrimeMapper.class);
 
-
+            //Output paths.
             FileOutputFormat.setOutputPath(job2, new Path(args[1] + "/final"));
             MultipleOutputs.addNamedOutput(job2, "q1a2", TextOutputFormat.class, Text.class, Text.class);
             MultipleOutputs.addNamedOutput(job2, "q3before2000", TextOutputFormat.class, Text.class, Text.class);
@@ -89,10 +94,7 @@ public class AnalysisJob{
             MultipleOutputs.addNamedOutput(job2, "q7", TextOutputFormat.class, Text.class, Text.class);
 
             // Wait for job to complete.
-            job2.waitForCompletion(true);
-
-            Runtime rt = Runtime.getRuntime();
-            Process pr = rt.exec("$HADOOP_HOME/bin/hdfs dfs -get /home/census/output/final/q7-r-00000 .");
+            System.exit(job2.waitForCompletion(true) ? 0 : 1);
 
         }
         catch (IOException e) {
