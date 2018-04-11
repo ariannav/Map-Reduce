@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class PlaneMapper extends Mapper<LongWritable, Text, Text, Text> {
 
-    //Parses the carriers file.
+    //Parses the planes file.
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
         String[] values = value.toString().split(",");

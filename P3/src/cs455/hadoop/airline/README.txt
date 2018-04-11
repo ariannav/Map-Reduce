@@ -12,10 +12,30 @@ COMPILE
 
 RUN
 ===================
+    Change Environment Variable:
+        export HADOOP_CONF_DIR=/s/bach/m/under/arivacca/client-config/client-config
     Remove Existing HDFS Directory:
         $HADOOP_HOME/bin/hdfs dfs -rm -r /home/census/output/
     Run Hadoop:
         $HADOOP_HOME/bin/hadoop jar dist/airline.jar cs455.hadoop.airline.AnalysisJob /data/main /home/census/output
+    Run Q7:
+        $HADOOP_HOME/bin/hdfs dfs -get /home/census/output/final/q7-r-00000 .
+        python src/cs455/hadoop/airline/q7visual.py
+        (Make sure you are in the same directory as the P3 src directory.)
+
+VIEW OUTPUT
+===================
+    View Available Files in HDFS:
+        $HADOOP_HOME/bin/hdfs dfs -ls /home/census/output/final
+    See contents of file:
+        Q1/Q2:  q1a2-r-00000
+        Q3:     q3before2000-r-00000
+                q3before2009-r-00000
+                q3overall-r-00000
+        Q4:     q4-r-00000
+        Q5:     q5-r-00000
+        Q6:     q6-r-00000
+        Q7:     q7-r-00000
 
 CLASS DESCRIPTIONS
 ===================
@@ -67,6 +87,75 @@ CLASS DESCRIPTIONS
         sorted order. The rest has been left unchanged. The output is sent on
         to Job2Reducer.
     - q7visual: A python program used for the visualization of Q7. Uses
-        matplotlib to present the data from Q7 in a bar-chart format. 
+        matplotlib to present the data from Q7 in a bar-chart format.
 
+
+METHODOLOGY
+===================
+Q1/Q2:      Job 1 takes the month, day, hour, and the corresponding arrival
+            delay. Reduces it to a delay for each month, day, and hour. There
+            are 12 month delays, 7 day delays, and 24 hour delays.
+            Job 2 takes the output from job 1, and finds the max and min of each
+            value. The reducer receives 3 keys for Q1: 'm', 'd', and 'h'.
+            Finds the min and max for each key.
+Q3:         Job 1 takes both the origin and the destination airport. For each
+            year, and the overall value, it counts the number of times that
+            airport appears. The reducer produces a collected count of
+            occurrences for each airport, each year.
+            Job 2 takes the output from job 1, and sorts the output for each
+            year (and overall values) in descending order. The reducer receives
+            the values for each year, and outputs the first ten that appear.
+            The output goes to different files depending on the range of years.
+Q4:         Job 1 takes the carrier code, carrier delay, and the count of
+            delayed flights. It only takes these values if carrier delay > 0.
+            Job 1 outputs the carriers and the sum of their delays, and delayed
+            flights.
+            Job 2 takes the output of job 1 and the carriers.csv data and
+            combines them by key in the reducer. They are joined on the carrier
+            code. The carrier code is replaced with each Carrier's name, and is
+            output with the total number of delayed minutes, the number of
+            delayed flights, and the average.
+Q5:         Job 1 takes the tail number, arrival delay, and count of flights. It
+            outputs these values in an array, where the indices correspond to
+            the year of the flight. The combiner and reducer accumulates these
+            values for each position in the array. The reducer ends with one
+            array for each plane, containing the delayed minutes and flights
+            for each year for that plane.
+            Job 2 takes the output of job 1, and the data in the planes.csv file
+            and joins these values on the tail number. The reducer loops through
+            the array values for each tailnum, and looks at the manufactured
+            year. If the plane is considered 'old' for that year, the delay sum
+            and the count is added to the 'Old sum' and 'Old count'. Otherwise
+            the output is added to the 'New sum' and 'New count'. The total avg
+            of these two values is output by dividing the sum by the count for
+            old and new planes.
+Q6:         Job 1 takes the weather delay and the departure delay. If both are
+            greater than 0, we can say the weather delay is a result of the
+            origin airport. There are no other assumptions made. When departure
+            and weather delay > 0, the airport code and a '1' are sent to the
+            combiner and reducer. Additionally, job 1 also takes in the
+            airports.csv file in another mapper. Each airport is output as the
+            airport key, and the city. The main data and the airports.csv data
+            are joined in the reducer, which outputs the city and its
+            corresponding number of weather delays.
+            Job 2 takes in the output from job 1 and sorts the values in
+            descending order depending on the number of weather delays. The
+            reducer receives these values and loops through the first ten.
+            These are the top ten cities with the most weather delay.
+Q7:         Job 1 takes the security delay and the security-related
+            cancellations and outputs them with the airport code. Like in Q6,
+            airports.csv is also parsed in job 1, and is output as airport code,
+            city. The main data set and the airports.csv file are joined on the
+            airport code, and the security related incidents are joined with the
+            city.
+            In job 2, values from FBI Crime In the US Data (source below) is
+            reduced by city, rate of violent crimes. Job 2 also takes in the Q7
+            output from job 1. Both the job 1 output and the FBI crime data are
+            sorted in descending order, and the top ten of both datasets are
+            found. The top cities from each dataset are output.
+            The python file takes the output data, and displays it in a bar
+            graph to compare the crime rates for the top ten cities and their
+            corresponding airport data. The output figure is stored in the
+            current directory under q7fig.png. 
+            FBI Data Source: https://ucr.fbi.gov/crime-in-the-u.s/
 
