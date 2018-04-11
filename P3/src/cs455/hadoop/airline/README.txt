@@ -20,7 +20,7 @@ RUN
         $HADOOP_HOME/bin/hadoop jar dist/airline.jar cs455.hadoop.airline.AnalysisJob /data/main /home/census/output
     Run Q7:
         $HADOOP_HOME/bin/hdfs dfs -get /home/census/output/final/q7-r-00000 .
-        python src/cs455/hadoop/airline/q7visual.py
+        python src/cs455/hadoop/airline/q7visual.py q7-r-00000
         (Make sure you are in the same directory as the P3 src directory.)
 
 VIEW OUTPUT
@@ -156,6 +156,6 @@ Q7:         Job 1 takes the security delay and the security-related
             The python file takes the output data, and displays it in a bar
             graph to compare the crime rates for the top ten cities and their
             corresponding airport data. The output figure is stored in the
-            current directory under q7fig.png. 
+            current directory under q7fig.png.
             FBI Data Source: https://ucr.fbi.gov/crime-in-the-u.s/
 
